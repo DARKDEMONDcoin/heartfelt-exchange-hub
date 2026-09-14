@@ -12836,7 +12836,32 @@ section:has(> .integration-grid-wave) {
   backdrop-filter: blur(14px) saturate(1.08);
 }
 .chat-composer > [data-slot="input-group"] {
+  position: relative;
   overflow: visible;
+}
+.chat-composer-textarea {
+  height: 3rem;
+  flex: 0 0 3rem;
+}
+.chat-composer-placeholder {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0.75rem;
+  top: 0;
+  height: 3rem;
+  overflow: hidden;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  color: color-mix(in oklab, var(--muted-foreground) 88%, var(--chat-accent));
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+.chat-composer-caret {
+  flex: none;
+  color: var(--chat-accent);
+  animation: chat-caret 0.85s steps(1) infinite;
 }
 .chat-composer::before {
   display: none;

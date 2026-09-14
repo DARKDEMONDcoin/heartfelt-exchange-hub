@@ -1037,17 +1037,21 @@ function ChatView({
                 ref={inputRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder={
-                  rotatingPlaceholder ? `${rotatingPlaceholder}▌` : `اكتب طلبك لـ${member.name}…`
-                }
+                placeholder=""
+                aria-label={`اكتب طلبك لـ${member.name}`}
                 dir="auto"
                 rows={1}
-                style={{ height: draft ? undefined : "3rem" }}
                 className={cn(
-                  "field-sizing-fixed max-h-40 min-h-12 resize-none bg-transparent px-3 py-2.5 placeholder:text-muted-foreground/80",
+                  "chat-composer-textarea field-sizing-fixed max-h-40 min-h-12 resize-none bg-transparent px-3 py-2.5",
                   draft ? "overflow-y-auto" : "overflow-hidden",
                 )}
               />
+              {!draft ? (
+                <span className="chat-composer-placeholder" aria-hidden="true" dir="auto">
+                  {rotatingPlaceholder || `اكتب طلبك لـ${member.name}…`}
+                  <span className="chat-composer-caret">▌</span>
+                </span>
+              ) : null}
               {toolsOpen ? (
                 <div className="chat-tool-launcher" aria-label="أدوات الطلب">
                   <button
