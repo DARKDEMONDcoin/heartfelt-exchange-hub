@@ -283,7 +283,12 @@ export function AppShell({
                 <p className="truncate text-xs text-muted-foreground sm:text-sm">{lead}</p>
               ) : null}
             </div>
-            <div className="flex min-w-0 shrink items-center gap-1 sm:gap-2">
+            <div
+              className={cn(
+                "flex min-w-0 shrink items-center gap-1 sm:gap-2",
+                compactTitle && "flex-1 overflow-hidden sm:flex-initial sm:overflow-visible",
+              )}
+            >
               {actions}
               <Link
                 to="/app/approvals"
