@@ -20,6 +20,10 @@ import { ReelStudio } from "@/components/app/ReelStudio";
 import { cn } from "@/lib/utils";
 
 export type Attachment = { url: string; type: "image" | "video"; alt?: string };
+
+/** حتى ١٠ صور/فيديوهات مع بعض في نفس الرسالة، وكل ملف حتى ٥٠ ميجابايت. */
+const MAX_ATTACHMENTS = 10;
+const MAX_BYTES = 50 * 1024 * 1024;
 export type ImageMode = "auto" | "off" | "manual";
 export type Aspect = "square" | "portrait" | "landscape" | "story";
 
