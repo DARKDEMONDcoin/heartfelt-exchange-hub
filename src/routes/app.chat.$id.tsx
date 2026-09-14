@@ -690,6 +690,7 @@ function ChatPage() {
       title={member.name}
       lead={member.role}
       padded={false}
+      compactTitle
       actions={
         <div className="no-scrollbar flex min-w-0 flex-1 items-center justify-end gap-1 overflow-x-auto sm:gap-1.5">
           <SkillPalette
