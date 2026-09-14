@@ -691,7 +691,7 @@ function ChatPage() {
       lead={member.role}
       padded={false}
       actions={
-        <div className="no-scrollbar flex min-w-0 max-w-[64vw] items-center gap-1.5 overflow-x-auto sm:max-w-none">
+        <div className="no-scrollbar flex min-w-0 flex-1 items-center justify-end gap-1 overflow-x-auto sm:gap-1.5">
           <SkillPalette
             skills={employeeSkills}
             quick={quickSkills}
