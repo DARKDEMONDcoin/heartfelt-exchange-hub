@@ -379,18 +379,63 @@ type WorkTool = {
   id: string;
   title: string;
   description: string;
-  to: "/app/tasks" | "/app/autopilot" | "/app/calendar" | "/app/automations" | "/app/queue" | "/app/approvals";
+  to:
+    | "/app/tasks"
+    | "/app/autopilot"
+    | "/app/calendar"
+    | "/app/automations"
+    | "/app/queue"
+    | "/app/approvals";
   icon: typeof ListChecks;
   sonnyOnly?: boolean;
 };
 
 const WORK_TOOLS: WorkTool[] = [
-  { id: "tasks", title: "المهام", description: "تابع التنفيذ خطوة بخطوة", to: "/app/tasks", icon: ListChecks },
-  { id: "autopilot", title: "الطيار الآلي", description: "شغّل صناعة ونشر المحتوى", to: "/app/autopilot", icon: Plane, sonnyOnly: true },
-  { id: "calendar", title: "تقويم المحتوى", description: "خطّط وراجع المحتوى بصريًا", to: "/app/calendar", icon: CalendarDays, sonnyOnly: true },
-  { id: "automations", title: "الجدولة التلقائية", description: "كرّر المهام في مواعيدها", to: "/app/automations", icon: CalendarClock },
-  { id: "queue", title: "طابور النشر", description: "راقب المنشورات ومواعيدها", to: "/app/queue", icon: History, sonnyOnly: true },
-  { id: "approvals", title: "الموافقات", description: "راجع واعتمد النتائج", to: "/app/approvals", icon: CheckCircle2 },
+  {
+    id: "tasks",
+    title: "المهام",
+    description: "تابع التنفيذ خطوة بخطوة",
+    to: "/app/tasks",
+    icon: ListChecks,
+  },
+  {
+    id: "autopilot",
+    title: "الطيار الآلي",
+    description: "شغّل صناعة ونشر المحتوى",
+    to: "/app/autopilot",
+    icon: Plane,
+    sonnyOnly: true,
+  },
+  {
+    id: "calendar",
+    title: "تقويم المحتوى",
+    description: "خطّط وراجع المحتوى بصريًا",
+    to: "/app/calendar",
+    icon: CalendarDays,
+    sonnyOnly: true,
+  },
+  {
+    id: "automations",
+    title: "الجدولة التلقائية",
+    description: "كرّر المهام في مواعيدها",
+    to: "/app/automations",
+    icon: CalendarClock,
+  },
+  {
+    id: "queue",
+    title: "طابور النشر",
+    description: "راقب المنشورات ومواعيدها",
+    to: "/app/queue",
+    icon: History,
+    sonnyOnly: true,
+  },
+  {
+    id: "approvals",
+    title: "الموافقات",
+    description: "راجع واعتمد النتائج",
+    to: "/app/approvals",
+    icon: CheckCircle2,
+  },
 ];
 
 const EMPLOYEE_COPY: Record<string, { prompts: string[]; greetings: string[] }> = {
@@ -601,8 +646,7 @@ function ChatView({
 
   const send = useMutation({
     mutationFn: async (message: string) => {
-      const activeConversationId =
-        conversationId ?? (await createConversation.mutateAsync()).id;
+      const activeConversationId = conversationId ?? (await createConversation.mutateAsync()).id;
       if (!conversationId) setConversationId(activeConversationId);
       const result = await ask({
         data: {
@@ -621,7 +665,9 @@ function ChatView({
     },
 
     onSuccess: async ({ result: res, activeConversationId }) => {
-      await qc.invalidateQueries({ queryKey: ["messages", workspace?.id, id, activeConversationId] });
+      await qc.invalidateQueries({
+        queryKey: ["messages", workspace?.id, id, activeConversationId],
+      });
       if (cancelledRef.current) {
         cancelledRef.current = false;
         return;
@@ -652,8 +698,7 @@ function ChatView({
 
   const skillRun = useMutation({
     mutationFn: async (p: { skill: Skill; values: Record<string, string> }) => {
-      const activeConversationId =
-        conversationId ?? (await createConversation.mutateAsync()).id;
+      const activeConversationId = conversationId ?? (await createConversation.mutateAsync()).id;
       if (!conversationId) setConversationId(activeConversationId);
       return runSkillFn({
         data: {
@@ -1187,7 +1232,11 @@ function ChatView({
         {embeddedTool ? (
           <section className="chat-embedded-tool" aria-label={embeddedTool.title}>
             <header>
-              <button type="button" onClick={() => setEmbeddedTool(null)} aria-label="العودة للمحادثة">
+              <button
+                type="button"
+                onClick={() => setEmbeddedTool(null)}
+                aria-label="العودة للمحادثة"
+              >
                 <ArrowRight className="size-4" />
               </button>
               <div>
@@ -1426,13 +1475,28 @@ function ChatView({
                       const Icon = tool.icon;
                       return (
                         <article key={tool.id} className="chat-work-card">
-                          <span className="chat-work-card-icon"><Icon className="size-4" /></span>
-                          <div><strong>{tool.title}</strong><small>{tool.description}</small></div>
+                          <span className="chat-work-card-icon">
+                            <Icon className="size-4" />
+                          </span>
+                          <div>
+                            <strong>{tool.title}</strong>
+                            <small>{tool.description}</small>
+                          </div>
                           <div className="chat-work-card-actions">
-                            <button type="button" onClick={() => { setEmbeddedTool(tool); setBarPanel(null); }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEmbeddedTool(tool);
+                                setBarPanel(null);
+                              }}
+                            >
                               فتح هنا
                             </button>
-                            <Link to={tool.to} aria-label={`فتح صفحة ${tool.title}`} title="فتح الصفحة الكاملة">
+                            <Link
+                              to={tool.to}
+                              aria-label={`فتح صفحة ${tool.title}`}
+                              title="فتح الصفحة الكاملة"
+                            >
                               <ExternalLink className="size-3.5" />
                             </Link>
                           </div>
