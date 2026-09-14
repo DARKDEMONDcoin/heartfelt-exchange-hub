@@ -30,6 +30,7 @@ import { AppIcon, appLabel } from "@/components/site/AppIcon";
 import { ConnectNow } from "@/components/app/ConnectNow";
 import { getMember } from "@/data/team";
 import {
+  useAddBrainItem,
   useBrainItems,
   useConversations,
   useCreateConversation,
@@ -53,6 +54,7 @@ import { HandoffCard } from "@/components/app/HandoffCard";
 import { PublishToWordPress } from "@/components/app/PublishToWordPress";
 import { ActionPanel } from "@/components/app/ActionPanel";
 import { UserAvatar } from "@/components/app/UserAvatar";
+import { BrandVoiceExtractor } from "@/components/app/BrandVoiceExtractor";
 import { Portrait } from "@/components/site/Portrait";
 import {
   MediaStudio,
@@ -595,6 +597,7 @@ function ChatPage() {
   const { data: messages } = useMessages(workspace?.id, id, conversationId);
   const { data: integrations } = useIntegrations(workspace?.id);
   const { data: brainItems } = useBrainItems(workspace?.id);
+  const addBrainItem = useAddBrainItem(workspace?.id);
   const hasVoiceGuide = (brainItems ?? []).some((b) => b.title === "دليل صوت العلامة");
   const { prompt: prefill } = Route.useSearch();
   const [draft, setDraft] = useState(prefill ?? "");
