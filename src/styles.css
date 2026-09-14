@@ -12994,8 +12994,37 @@ section:has(> .integration-grid-wave) {
   backdrop-filter: blur(10px) saturate(1.08);
 }
 @media (max-width: 640px) {
+  .app-topbar {
+    padding-inline: 0.45rem;
+    padding-top: max(0.45rem, env(safe-area-inset-top));
+  }
   .app-topbar-inner {
-    border-radius: 1.5rem;
+    min-height: 3.75rem;
+    gap: 0.35rem;
+    padding: 0.35rem;
+    border-radius: 1.35rem;
+  }
+  .app-topbar-inner > button,
+  .app-topbar-inner > div:last-child > button:last-child {
+    width: 2.65rem;
+    height: 2.65rem;
+    min-width: 2.65rem;
+  }
+  .chat-topbar-actions {
+    gap: 0.4rem;
+    justify-content: flex-start;
+    padding-inline: 0.1rem;
+    scroll-padding-inline: 0.5rem;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline proximity;
+  }
+  .chat-topbar-actions > * {
+    flex: none;
+    scroll-snap-align: start;
+  }
+  .chat-topbar-actions > div:first-child {
+    width: 2.5rem;
+    min-width: 2.5rem;
   }
 }
 
@@ -13045,6 +13074,26 @@ section:has(> .integration-grid-wave) {
     padding-inline: 0.55rem;
   }
 }
+@media (max-width: 640px) {
+  .topbar-pill,
+  .chat-new-button,
+  .chat-topbar-actions > div > button {
+    width: 2.5rem;
+    height: 2.5rem;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    justify-content: center;
+    padding: 0;
+  }
+  .topbar-pill > small {
+    display: none;
+  }
+}
+@media (max-width: 380px) {
+  .chat-new-button {
+    display: none;
+  }
+}
 
 /* لوحات الشريط: تُفتح داخل نفس الصفحة أسفل الشريط بزجاج نظيف. */
 .topbar-sheet-backdrop {
@@ -13070,6 +13119,42 @@ section:has(> .integration-grid-wave) {
   backdrop-filter: blur(30px) saturate(1.2);
   opacity: 1 !important;
   animation: none;
+}
+@media (max-width: 640px) {
+  .topbar-sheet {
+    top: 4.65rem;
+    inset-inline: 0.5rem;
+    width: auto;
+    max-height: calc(100dvh - 5.15rem - env(safe-area-inset-bottom));
+    padding: 0.75rem;
+    border-radius: 1.15rem;
+    overscroll-behavior: contain;
+  }
+  .topbar-sheet-head {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.5rem;
+  }
+  .topbar-sheet-head > div {
+    min-width: 0;
+  }
+  .topbar-sheet-head p,
+  .topbar-sheet-head span {
+    overflow-wrap: anywhere;
+  }
+  .topbar-sheet-head button,
+  .chat-history-row > button:last-child {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .topbar-app-row {
+    min-height: 3.25rem;
+    gap: 0.5rem;
+  }
+  .topbar-app-row button,
+  .chat-history-new {
+    min-height: 2.75rem;
+  }
 }
 
 .chat-history-sheet,
@@ -13345,16 +13430,85 @@ section:has(> .integration-grid-wave) {
     padding-bottom: 8.25rem;
   }
   .chat-embedded-tool {
-    inset-block-start: 4.35rem;
+    inset-block-start: 4.65rem;
   }
-  .chat-embedded-tool > header > a span {
+  .chat-embedded-tool > header {
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+    gap: 0.45rem;
+    min-height: 3.6rem;
+    padding-inline: 0.5rem;
+  }
+  .chat-embedded-tool > header > button,
+  .chat-embedded-tool > header > a {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0;
+  }
+  .chat-embedded-tool > header > button span,
+  .chat-embedded-tool > header > a span,
+  .chat-embedded-tool > header > div > span {
     display: none;
+  }
+  .chat-embedded-tool > header strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8rem;
   }
   .chat-inline-tool {
     min-height: 54dvh;
   }
+  .chat-inline-tool > header {
+    grid-template-columns: minmax(0, 1fr) 2.75rem 2.75rem;
+    min-height: 3.6rem;
+    padding-inline: 0.55rem;
+  }
+  .chat-inline-tool > header > div {
+    min-width: 0;
+  }
+  .chat-inline-tool > header strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chat-inline-tool > header button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
   .chat-inline-tool > iframe {
     height: 48dvh;
+  }
+  .chat-work-card {
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0.55rem;
+    min-height: 0;
+    padding: 0.65rem;
+  }
+  .chat-work-card-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  .chat-work-card-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 2.75rem;
+    gap: 0.4rem;
+  }
+  .chat-work-card-actions button,
+  .chat-work-card-actions a {
+    min-height: 2.75rem;
+  }
+  .chat-work-card-actions a {
+    width: 2.75rem;
+  }
+  .chat-work-card strong {
+    font-size: 0.8rem;
+  }
+  .chat-work-card small {
+    font-size: 0.68rem;
+    line-height: 1.45;
   }
 }
 

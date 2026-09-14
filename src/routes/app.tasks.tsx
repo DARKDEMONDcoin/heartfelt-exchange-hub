@@ -72,9 +72,9 @@ function TasksPage() {
       </div>
 
       {isLoading ? (
-        <p className="mt-8 flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="mt-8 flex items-center gap-2 text-sm text-muted-foreground">
           <BrandLoader size="sm" />
-        </p>
+        </div>
       ) : list.length === 0 ? (
         <div className="mt-6 rounded-3xl border border-border bg-card p-12 text-center">
           <p className="font-display text-xl font-black">لا توجد مهام هنا</p>
