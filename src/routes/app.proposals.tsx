@@ -156,10 +156,10 @@ function ProposalsPage() {
                     </button>
                   ) : (
                     <Link
-                      to="/app/integrations"
+                      to={p.signal.includes("approvals") ? "/app/approvals" : "/app/integrations"}
                       className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-bold text-background"
                     >
-                      افتح ما يلزم
+                      {p.signal.includes("approvals") ? "افتح الموافقات" : "اربط حساباتك"}
                     </Link>
                   )}
                   <button
