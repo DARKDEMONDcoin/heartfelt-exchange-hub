@@ -13019,7 +13019,12 @@ section:has(> .integration-grid-wave) {
     scroll-snap-type: inline proximity;
   }
   .chat-topbar-actions > * {
+    flex: none;
     scroll-snap-align: start;
+  }
+  .chat-topbar-actions > div:first-child {
+    width: 2.5rem;
+    min-width: 2.5rem;
   }
 }
 
