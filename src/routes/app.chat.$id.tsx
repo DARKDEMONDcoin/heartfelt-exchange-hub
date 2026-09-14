@@ -638,6 +638,9 @@ function ChatPage() {
   }, [workspace, conversations, createConversation]);
 
   const [showSettings, setShowSettings] = useState(false);
+  /** لوحات الشريط العلوي — تُفتح كلها داخل نفس الصفحة. */
+  const [barPanel, setBarPanel] = useState<"apps" | "brand" | null>(null);
+  const [brandSource, setBrandSource] = useState("");
   const [sidePanelTab, setSidePanelTab] = useState<"chats" | "actions" | "accounts">("chats");
   const [toolsOpen, setToolsOpen] = useState(false);
   const [activeTool, setActiveTool] = useState<"media" | "length" | null>(null);
