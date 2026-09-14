@@ -703,39 +703,45 @@ function ChatPage() {
               skillRun.mutate({ skill, values });
             }}
           />
-          <button
-            type="button"
-            onClick={() => setBarPanel((v) => (v === "apps" ? null : "apps"))}
-            aria-expanded={barPanel === "apps"}
-            title={`تكاملات ${member.name}`}
-            className={cn("topbar-pill", barPanel === "apps" && "is-active")}
-          >
-            <PlugZap className="size-4 shrink-0" />
-            <span>التكاملات</span>
-            <small>
-              {owned.filter((i) => i.status === "connected").length}/{member.apps.length}
-            </small>
-          </button>
-          <button
-            type="button"
-            onClick={() => setBarPanel((v) => (v === "brand" ? null : "brand"))}
-            aria-expanded={barPanel === "brand"}
-            title="عقل وصوت العلامة"
-            className={cn("topbar-pill", barPanel === "brand" && "is-active")}
-          >
-            <Fingerprint className="size-4 shrink-0" />
-            <span>العلامة</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setBarPanel((v) => (v === "work" ? null : "work"))}
-            aria-expanded={barPanel === "work"}
-            title={`تشغيل ومتابعة ${member.name}`}
-            className={cn("topbar-pill", barPanel === "work" && "is-active")}
-          >
-            <Bot className="size-4 shrink-0" />
-            <span>التشغيل</span>
-          </button>
+          {member.apps.length ? (
+            <button
+              type="button"
+              onClick={() => setBarPanel((v) => (v === "apps" ? null : "apps"))}
+              aria-expanded={barPanel === "apps"}
+              title={`تكاملات ${member.name}`}
+              className={cn("topbar-pill", barPanel === "apps" && "is-active")}
+            >
+              <PlugZap className="size-4 shrink-0" />
+              <span>التكاملات</span>
+              <small>
+                {owned.filter((i) => i.status === "connected").length}/{member.apps.length}
+              </small>
+            </button>
+          ) : null}
+          {BAR_BRAND.has(member.id) ? (
+            <button
+              type="button"
+              onClick={() => setBarPanel((v) => (v === "brand" ? null : "brand"))}
+              aria-expanded={barPanel === "brand"}
+              title="عقل وصوت العلامة"
+              className={cn("topbar-pill", barPanel === "brand" && "is-active")}
+            >
+              <Fingerprint className="size-4 shrink-0" />
+              <span>العلامة</span>
+            </button>
+          ) : null}
+          {BAR_WORK.has(member.id) ? (
+            <button
+              type="button"
+              onClick={() => setBarPanel((v) => (v === "work" ? null : "work"))}
+              aria-expanded={barPanel === "work"}
+              title={`تشغيل ومتابعة ${member.name}`}
+              className={cn("topbar-pill", barPanel === "work" && "is-active")}
+            >
+              <Bot className="size-4 shrink-0" />
+              <span>التشغيل</span>
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={() => {
