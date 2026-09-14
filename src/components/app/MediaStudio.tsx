@@ -74,6 +74,8 @@ export function MediaStudio({
   const [results, setResults] = useState<string[]>([]);
   const [linkValue, setLinkValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(0);
+  const fileInput = useRef<HTMLInputElement>(null);
   const generate = useServerFn(generateMedia);
 
   const run = useMutation({
