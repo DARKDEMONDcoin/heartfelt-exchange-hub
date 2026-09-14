@@ -12141,7 +12141,7 @@ section:has(> .integration-grid-wave) {
   bottom: -1px;
   height: 1px;
   background: linear-gradient(
-    to inline-end,
+    90deg,
     transparent,
     color-mix(in oklab, var(--chat-accent) 55%, transparent),
     transparent
