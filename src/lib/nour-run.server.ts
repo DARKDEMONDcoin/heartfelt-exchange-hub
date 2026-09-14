@@ -577,6 +577,22 @@ export async function executeSkill(
     }
   }
 
+  // ذاكرة القرارات: القرارات المعتمدة سابقاً تبقى ملزمة في كل تنفيذ.
+  let decisionsMemory = "";
+  try {
+    const { decisionsBlock } = await import("./decisions.server");
+    decisionsMemory = await decisionsBlock(
+      client,
+      params.workspaceId,
+      `${skill.title} ${requestSummary}`,
+      6,
+    );
+  } catch (error) {
+    console.error("[decisions] skill context failed:", error);
+  }
+
+
+
 
 
 
@@ -621,6 +637,7 @@ export async function executeSkill(
     params.employeeId === "nour" ? seoPlaybookBlock : "",
     sirajMemory,
     nourMemory,
+    decisionsMemory,
     ...sharedSystemBlocks({
       employeeId: params.employeeId,
       connected,
@@ -694,6 +711,26 @@ export async function executeSkill(
   // إزالة المجاملات الافتتاحية («أهلاً بك… بصفتي…») حتى يبدأ المخرج بالمحتوى مباشرة.
   // لو كان المخرج كله مجاملة فلا نُفرغه — نُعيد الأصل بدل تسليم صفحة فارغة.
   output = sanitizeActionClaims(sanitizeOutput(stripPreamble(output) || output));
+
+  // حَكَم الجودة: لا يخرج أي مخرج للمالك قبل أن يُقاس على معايير قبول القدرة،
+  // ويُعاد كتابته مرة واحدة عند رسوبه.
+  let qualityScore: number | null = null;
+  let qualityRevised = false;
+  try {
+    const { judgeAndImprove } = await import("./quality-judge.server");
+    const verdict = await judgeAndImprove({
+      employeeId: params.employeeId,
+      request: `${skill.title} — ${requestSummary}`,
+      output,
+      criteria: qualityCriteria[params.employeeId] ?? [],
+      bannedWords: workspace.banned_words ?? [],
+    });
+    qualityScore = verdict.score || null;
+    qualityRevised = verdict.revised;
+    output = verdict.output;
+  } catch (error) {
+    console.warn("[judge] skill skipped:", error instanceof Error ? error.message : error);
+  }
 
 
 
@@ -773,12 +810,32 @@ export async function executeSkill(
       steps: [
         { label: "فهم الطلب", state: "done" },
         { label: "التنفيذ", state: "done" },
+        {
+          label: qualityScore
+            ? `مراجعة الجودة — ${qualityScore}/100${qualityRevised ? " (أُعيدت الكتابة)" : ""}`
+            : "مراجعة الجودة",
+          state: "done",
+        },
         { label: "مراجعتك", state: "active" },
         { label: "النشر", state: "todo" },
       ],
     })
     .select("id")
     .single();
+
+  // ذاكرة القرارات: نحفظ ما حُسم في هذا المخرج كي يبقى ملزماً لكل الفريق.
+  try {
+    const { extractDecisions, recordDecisions } = await import("./decisions.server");
+    const drafts = await extractDecisions(`${skill.title} — ${requestSummary}`, output);
+    await recordDecisions(client, {
+      workspaceId: params.workspaceId,
+      employeeId: params.employeeId,
+      conversationId: params.conversationId ?? null,
+      drafts,
+    });
+  } catch (error) {
+    console.warn("[decisions] skill capture skipped:", error instanceof Error ? error.message : error);
+  }
 
   return {
     output,

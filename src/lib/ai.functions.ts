@@ -393,6 +393,15 @@ export const askEmployee = createServerFn({ method: "POST" })
     }
 
     // ذاكرة نور التشغيلية: أرقام Search Console الحقيقية + الكلمات المتتبَّعة + ما نشرته + قنوات النشر.
+    // ذاكرة القرارات: ما اتفقتم عليه سابقاً يُحقن دائماً كي لا يتناقض الموظف مع نفسه.
+    let decisionsMemory = "";
+    try {
+      const { decisionsBlock } = await import("./decisions.server");
+      decisionsMemory = await decisionsBlock(supabase as never, data.workspaceId, data.message, 6);
+    } catch (error) {
+      console.error("[decisions] context failed:", error);
+    }
+
     let nourMemory = "";
     if (data.employeeId === "nour") {
       try {
@@ -418,6 +427,7 @@ export const askEmployee = createServerFn({ method: "POST" })
       data.employeeId === "nour" ? seoPlaybookBlock : "",
       sirajMemory,
       nourMemory,
+      decisionsMemory,
       qualityCriteria[data.employeeId]?.length
         ? `## معايير قبول الرد\n${(qualityCriteria[data.employeeId] ?? []).map((criterion, index) => `${index + 1}) ${criterion}`).join("\n")}`
         : "",
@@ -857,6 +867,32 @@ export const askEmployee = createServerFn({ method: "POST" })
     // منع التكرار: أحياناً يعيد النموذج نفس الفقرة مرتين (ملخص + مخرج) — نُبقي أول ظهور فقط.
     reply = dedupeParagraphs(reply);
 
+    // حَكَم الجودة: مراجعة إلزامية للمخرجات الطويلة قبل أن تراها — وإصلاح واحد موجّه عند الرسوب.
+    let qualityScore: number | null = null;
+    if (intent === "work" && reply.length > 900) {
+      try {
+        const { judgeAndImprove } = await import("./quality-judge.server");
+        const verdict = await judgeAndImprove({
+          employeeId: data.employeeId,
+          request: data.message,
+          output: reply,
+          criteria: qualityCriteria[data.employeeId] ?? [],
+          bannedWords: workspace.banned_words ?? [],
+        });
+        qualityScore = verdict.score || null;
+        if (verdict.revised) {
+          // مخرج واحد فقط: نجعل المهمة المحفوظة مطابقة تماماً لما يظهر في المحادثة.
+          if (deliverables.length === 1 && deliverables[0]?.body) {
+            deliverables[0]!.body = verdict.output;
+          }
+          reply = verdict.output;
+        }
+      } catch (error) {
+        console.warn("[judge] skipped:", error instanceof Error ? error.message : error);
+      }
+    }
+
+
     const { data: assistantRow, error: assistantError } = await supabase
       .from("messages")
       .insert({
@@ -906,7 +942,26 @@ export const askEmployee = createServerFn({ method: "POST" })
       createdTaskId = createdTaskId ?? task?.id ?? null;
     }
 
+    // ذاكرة القرارات: نحفظ ما حُسم فعلاً في هذا التبادل كي لا يُعاد طرحه لاحقاً.
+    let savedDecisions = 0;
+    if (reply.length > 200) {
+      try {
+        const { extractDecisions, recordDecisions } = await import("./decisions.server");
+        const drafts = await extractDecisions(data.message, reply);
+        savedDecisions = await recordDecisions(supabase as never, {
+          workspaceId: data.workspaceId,
+          employeeId: data.employeeId,
+          conversationId: data.conversationId,
+          drafts,
+        });
+      } catch (error) {
+        console.warn("[decisions] capture skipped:", error instanceof Error ? error.message : error);
+      }
+    }
+
     return {
+      qualityScore,
+      savedDecisions,
       reply,
       messageId: assistantRow.id,
       createdTaskId,
