@@ -12614,8 +12614,13 @@ section:has(> .integration-grid-wave) {
     position: sticky;
     z-index: 2;
     inset-inline-start: 0;
+    min-width: 6.25rem;
+    padding-inline: 0.35rem 0.55rem;
     background: color-mix(in oklab, var(--background) 88%, transparent);
     backdrop-filter: blur(18px);
+  }
+  .employee-command-identity > span:last-child {
+    display: block;
   }
   .employee-command-skills {
     min-width: max-content;
