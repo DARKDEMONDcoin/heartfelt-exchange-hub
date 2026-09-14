@@ -513,7 +513,9 @@ function ThreadPicker({
       >
         <History className="size-3.5 shrink-0" />
         <span>{active?.title ?? "محادثة جديدة"}</span>
-        <ChevronDown className={cn("size-3.5 shrink-0 transition-transform", open && "rotate-180")} />
+        <ChevronDown
+          className={cn("size-3.5 shrink-0 transition-transform", open && "rotate-180")}
+        />
       </button>
       {open ? (
         <div className="chat-thread-menu" role="menu">
@@ -827,7 +829,11 @@ function ChatPage() {
                   }}
                 />
               </div>
-              <Link to="/app/brain" className="employee-command-link" title="المصادر التي يقرأها الموظف">
+              <Link
+                to="/app/brain"
+                className="employee-command-link"
+                title="المصادر التي يقرأها الموظف"
+              >
                 <BookOpenText className="size-3.5" />
                 <span>عقل العلامة</span>
               </Link>
@@ -835,7 +841,11 @@ function ChatPage() {
                 <AudioLines className="size-3.5" />
                 <span>صوت العلامة</span>
               </Link>
-              <Link to="/app/integrations" className="employee-command-link" title="حسابات الموظف المرتبطة">
+              <Link
+                to="/app/integrations"
+                className="employee-command-link"
+                title="حسابات الموظف المرتبطة"
+              >
                 <PlugZap className="size-3.5" />
                 <span>التكاملات</span>
               </Link>
@@ -901,15 +911,20 @@ function ChatPage() {
             {(messages ?? []).length === 0 && !pending ? (
               <div className="chat-welcome animate-pop-in">
                 <div className="chat-welcome-portraits" aria-hidden="true">
-                  <span className="chat-welcome-avatar is-user"><UserAvatar /></span>
+                  <span className="chat-welcome-avatar is-user">
+                    <UserAvatar />
+                  </span>
                   <span className="chat-welcome-avatar is-employee">
                     <Portrait memberId={member.id} name={member.name} className="size-full" />
                   </span>
                 </div>
-                <p className="chat-welcome-eyebrow">أنا {member.name}، {member.role}</p>
+                <p className="chat-welcome-eyebrow">
+                  أنا {member.name}، {member.role}
+                </p>
                 <h2>أهلًا {userName}</h2>
                 <p className="chat-welcome-rotating" aria-live="polite">
-                  {rotatingGreeting}<span className="typewriter-caret" aria-hidden="true" />
+                  {rotatingGreeting}
+                  <span className="typewriter-caret" aria-hidden="true" />
                 </p>
                 <p className="chat-welcome-tagline">{member.tagline}</p>
               </div>
@@ -1151,7 +1166,11 @@ function ChatPage() {
                   <div className="chat-tool-popover-head">
                     <div>
                       <p>{activeTool === "media" ? "الوسائط" : "طول المحتوى"}</p>
-                      <span>{activeTool === "media" ? "أرفق أو أنشئ ما يحتاجه الطلب" : "اختر الحجم الأنسب لهذه النتيجة"}</span>
+                      <span>
+                        {activeTool === "media"
+                          ? "أرفق أو أنشئ ما يحتاجه الطلب"
+                          : "اختر الحجم الأنسب لهذه النتيجة"}
+                      </span>
                     </div>
                     <button type="button" onClick={() => setActiveTool(null)} aria-label="إغلاق">
                       <X className="size-4" />
@@ -1174,12 +1193,14 @@ function ChatPage() {
                     />
                   ) : (
                     <div className="chat-length-options">
-                      {([
-                        ["auto", "تلقائي", "يقرر الموظف الأنسب"],
-                        ["short", "قصير", "مباشر وسريع"],
-                        ["medium", "متوسط", "متوازن ومفصل"],
-                        ["long", "مطوّل", "شامل ومتعمق"],
-                      ] as const).map(([value, label, hint]) => (
+                      {(
+                        [
+                          ["auto", "تلقائي", "يقرر الموظف الأنسب"],
+                          ["short", "قصير", "مباشر وسريع"],
+                          ["medium", "متوسط", "متوازن ومفصل"],
+                          ["long", "مطوّل", "شامل ومتعمق"],
+                        ] as const
+                      ).map(([value, label, hint]) => (
                         <button
                           key={value}
                           type="button"
@@ -1187,7 +1208,8 @@ function ChatPage() {
                           onClick={() => setPostLength(value)}
                           className={cn("chat-length-option", postLength === value && "is-active")}
                         >
-                          <span>{label}</span><small>{hint}</small>
+                          <span>{label}</span>
+                          <small>{hint}</small>
                           {postLength === value ? <Check className="size-4" /> : null}
                         </button>
                       ))}
@@ -1336,18 +1358,42 @@ function ChatPage() {
               ))}
             </div>
           </div>
-           <section className="chat-side-section"><p className="chat-side-label mb-3">التنفيذ والمتابعة</p><ActionPanel
-            employeeId={id}
-            workspaceId={workspace?.id}
-            connected={(integrations ?? [])
-              .filter((i) => i.status === "connected")
-              .map((i) => i.provider)}
-           /></section>
-           <div className="chat-side-links">
-             <Link to="/app/brain"><BookOpenText className="size-4" /><span>اقرأ عقل العلامة<small>{brainItems?.length ?? 0} مصادر معرفة</small></span><ArrowUpLeft className="size-3.5" /></Link>
-             <Link to="/app/brain"><AudioLines className="size-4" /><span>صوت العلامة<small>{hasVoiceGuide ? "جاهز للاستخدام" : "أضف نبرة علامتك"}</small></span><ArrowUpLeft className="size-3.5" /></Link>
-             <Link to="/app/integrations"><PlugZap className="size-4" /><span>كل التكاملات<small>{owned.filter((item) => item.status === "connected").length} حسابات متصلة</small></span><ArrowUpLeft className="size-3.5" /></Link>
-           </div>
+          <section className="chat-side-section">
+            <p className="chat-side-label mb-3">التنفيذ والمتابعة</p>
+            <ActionPanel
+              employeeId={id}
+              workspaceId={workspace?.id}
+              connected={(integrations ?? [])
+                .filter((i) => i.status === "connected")
+                .map((i) => i.provider)}
+            />
+          </section>
+          <div className="chat-side-links">
+            <Link to="/app/brain">
+              <BookOpenText className="size-4" />
+              <span>
+                اقرأ عقل العلامة<small>{brainItems?.length ?? 0} مصادر معرفة</small>
+              </span>
+              <ArrowUpLeft className="size-3.5" />
+            </Link>
+            <Link to="/app/brain">
+              <AudioLines className="size-4" />
+              <span>
+                صوت العلامة<small>{hasVoiceGuide ? "جاهز للاستخدام" : "أضف نبرة علامتك"}</small>
+              </span>
+              <ArrowUpLeft className="size-3.5" />
+            </Link>
+            <Link to="/app/integrations">
+              <PlugZap className="size-4" />
+              <span>
+                كل التكاملات
+                <small>
+                  {owned.filter((item) => item.status === "connected").length} حسابات متصلة
+                </small>
+              </span>
+              <ArrowUpLeft className="size-3.5" />
+            </Link>
+          </div>
         </aside>
       </div>
     </AppShell>

@@ -11595,10 +11595,17 @@ section:has(> .integration-grid-wave) {
   animation: chat-caret 0.85s steps(1) infinite;
 }
 @keyframes chat-caret {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
 .chat-composer-dock {
-  background: linear-gradient(to top, var(--background) 18%, color-mix(in oklab, var(--background) 72%, transparent) 68%, transparent);
+  background: linear-gradient(
+    to top,
+    var(--background) 18%,
+    color-mix(in oklab, var(--background) 72%, transparent) 68%,
+    transparent
+  );
 }
 .chat-composer {
   background: color-mix(in oklab, var(--background) 54%, transparent);
@@ -11684,8 +11691,12 @@ section:has(> .integration-grid-wave) {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .typewriter-caret { animation: none; }
-  .chat-thread-panel { transition: none; }
+  .typewriter-caret {
+    animation: none;
+  }
+  .chat-thread-panel {
+    transition: none;
+  }
 }
 
 /* الصفحة الرئيسية: أبيض وحبر كقاعدة، والذهب هو الإشارة البصرية الأساسية. */
@@ -12360,7 +12371,11 @@ section:has(> .integration-grid-wave) {
   font-size: 0.7rem;
   font-weight: 800;
   white-space: nowrap;
-  transition: border-color 180ms ease, background 180ms ease, color 180ms ease, transform 180ms ease;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
 }
 .employee-command-link:hover {
   border-color: color-mix(in oklab, var(--chat-accent) 45%, var(--border));
@@ -12374,7 +12389,11 @@ section:has(> .integration-grid-wave) {
   padding: 0.9rem;
   border-color: color-mix(in oklab, var(--chat-accent) 18%, var(--border));
   background:
-    linear-gradient(150deg, color-mix(in oklab, var(--chat-accent) 8%, transparent), transparent 16rem),
+    linear-gradient(
+      150deg,
+      color-mix(in oklab, var(--chat-accent) 8%, transparent),
+      transparent 16rem
+    ),
     color-mix(in oklab, var(--card) 88%, transparent);
   backdrop-filter: blur(28px) saturate(1.18);
 }
@@ -12508,7 +12527,11 @@ section:has(> .integration-grid-wave) {
   border-radius: 0.9rem;
   padding: 0.75rem;
   background:
-    linear-gradient(145deg, color-mix(in oklab, var(--chat-accent) 8%, transparent), transparent 50%),
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--chat-accent) 8%, transparent),
+      transparent 50%
+    ),
     color-mix(in oklab, var(--background) 76%, transparent);
   box-shadow: 0 28px 70px -40px var(--foreground);
   backdrop-filter: blur(26px) saturate(1.18);
