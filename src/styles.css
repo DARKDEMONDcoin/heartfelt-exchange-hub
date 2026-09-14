@@ -13040,18 +13040,8 @@ section:has(> .integration-grid-wave) {
   background: color-mix(in oklab, var(--background) 88%, transparent);
   box-shadow: 0 40px 80px -50px var(--foreground);
   backdrop-filter: blur(30px) saturate(1.2);
-  opacity: 1;
-  animation: topbar-sheet-in 0.22s ease-out both;
-}
-@keyframes topbar-sheet-in {
-  from {
-    transform: translateY(0.5rem) scale(0.985);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
+  opacity: 1 !important;
+  animation: none;
 }
 
 .chat-history-sheet,
