@@ -13089,6 +13089,11 @@ section:has(> .integration-grid-wave) {
     display: none;
   }
 }
+@media (max-width: 380px) {
+  .chat-new-button {
+    display: none;
+  }
+}
 
 /* لوحات الشريط: تُفتح داخل نفس الصفحة أسفل الشريط بزجاج نظيف. */
 .topbar-sheet-backdrop {
