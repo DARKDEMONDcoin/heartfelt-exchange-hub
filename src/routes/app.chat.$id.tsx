@@ -664,7 +664,7 @@ function ChatView({
     if (!el) return;
     // مربع فارغ = ارتفاع ثابت، حتى لا يتحرك مع تقليب الجُمل.
     if (!draft) {
-      el.style.height = "";
+      el.style.height = "3rem";
       return;
     }
     el.style.height = "auto";
