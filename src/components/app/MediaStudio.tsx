@@ -1,8 +1,19 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ImagePlus, Loader2, Link2, X, Wand2, Check, Globe, RefreshCw } from "lucide-react";
+import {
+  ImagePlus,
+  Loader2,
+  Link2,
+  X,
+  Wand2,
+  Check,
+  Globe,
+  RefreshCw,
+  Upload,
+} from "lucide-react";
 
+import { supabase } from "@/integrations/supabase/client";
 import { generateMedia } from "@/lib/media.functions";
 import { listSiteAssets, syncSiteAssets, type StoredAsset } from "@/lib/brand-assets.functions";
 import { ReelStudio } from "@/components/app/ReelStudio";
