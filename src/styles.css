@@ -13160,12 +13160,26 @@ section:has(> .integration-grid-wave) {
 }
 
 /* الدخان الذهبي يملأ الغلاف ويتحرك سريعاً في مسارات متعددة قبل بدء المحادثة. */
-.chat-smoke i:nth-child(1) { animation-duration: 7s; }
-.chat-smoke i:nth-child(2) { animation-duration: 8.5s; }
-.chat-smoke i:nth-child(3) { animation-duration: 10s; }
-.chat-smoke b:nth-of-type(1) { animation-duration: 5.5s; }
-.chat-smoke b:nth-of-type(2) { animation-duration: 7s; animation-delay: -2s; }
-.chat-smoke b:nth-of-type(3) { animation-duration: 8s; animation-delay: -4s; }
+.chat-smoke i:nth-child(1) {
+  animation-duration: 7s;
+}
+.chat-smoke i:nth-child(2) {
+  animation-duration: 8.5s;
+}
+.chat-smoke i:nth-child(3) {
+  animation-duration: 10s;
+}
+.chat-smoke b:nth-of-type(1) {
+  animation-duration: 5.5s;
+}
+.chat-smoke b:nth-of-type(2) {
+  animation-duration: 7s;
+  animation-delay: -2s;
+}
+.chat-smoke b:nth-of-type(3) {
+  animation-duration: 8s;
+  animation-delay: -4s;
+}
 .chat-stage.is-engaged::before,
 .chat-stage.is-engaged::after {
   display: none;

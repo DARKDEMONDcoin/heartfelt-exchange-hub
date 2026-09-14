@@ -680,7 +680,9 @@ function ChatPage() {
 
   const owned = (integrations ?? []).filter((i) => i.employee_id === id);
   const filteredConversations = (conversations ?? []).filter((conversation) =>
-    conversation.title.toLocaleLowerCase("ar").includes(conversationSearch.trim().toLocaleLowerCase("ar")),
+    conversation.title
+      .toLocaleLowerCase("ar")
+      .includes(conversationSearch.trim().toLocaleLowerCase("ar")),
   );
   const wpConnected = (integrations ?? []).some(
     (i) => i.provider === "wordpress" && i.status === "connected",
@@ -1473,19 +1475,42 @@ function ChatPage() {
                       .map((integration) => integration.provider)}
                   />
                   <div className="chat-work-links">
-                    <Link to="/app/tasks"><ListChecks className="size-4" /><span>المهام</span></Link>
-                    <Link to="/app/automations"><Bot className="size-4" /><span>الجدولة التلقائية</span></Link>
-                    <Link to="/app/approvals"><Check className="size-4" /><span>الموافقات</span></Link>
-                    {id === "sonny" ? <Link to="/app/calendar"><CalendarDays className="size-4" /><span>تقويم المحتوى</span></Link> : null}
-                    {id === "sonny" ? <Link to="/app/queue"><History className="size-4" /><span>طابور النشر</span></Link> : null}
-                    {id === "sonny" ? <Link to="/app/autopilot"><Bot className="size-4" /><span>الطيار الآلي</span></Link> : null}
+                    <Link to="/app/tasks">
+                      <ListChecks className="size-4" />
+                      <span>المهام</span>
+                    </Link>
+                    <Link to="/app/automations">
+                      <Bot className="size-4" />
+                      <span>الجدولة التلقائية</span>
+                    </Link>
+                    <Link to="/app/approvals">
+                      <Check className="size-4" />
+                      <span>الموافقات</span>
+                    </Link>
+                    {id === "sonny" ? (
+                      <Link to="/app/calendar">
+                        <CalendarDays className="size-4" />
+                        <span>تقويم المحتوى</span>
+                      </Link>
+                    ) : null}
+                    {id === "sonny" ? (
+                      <Link to="/app/queue">
+                        <History className="size-4" />
+                        <span>طابور النشر</span>
+                      </Link>
+                    ) : null}
+                    {id === "sonny" ? (
+                      <Link to="/app/autopilot">
+                        <Bot className="size-4" />
+                        <span>الطيار الآلي</span>
+                      </Link>
+                    ) : null}
                   </div>
                 </div>
               )}
             </section>
           </>
         ) : null}
-
       </div>
     </AppShell>
   );
