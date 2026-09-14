@@ -227,15 +227,20 @@ export function AppShell({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: profile } = useProfile();
+  const embedded = useRouterState({
+    select: (state) =>
+      (state.location.search as Record<string, unknown>)["embedded"] === "1" ||
+      (state.location.search as Record<string, unknown>)["embedded"] === true,
+  });
 
   return (
-    <div className="app-shell flex min-h-screen bg-background">
+    <div className={cn("app-shell flex min-h-screen bg-background", embedded && "is-embedded")}>
       <div className="sahl-smoke sahl-smoke-app" aria-hidden="true">
         <i />
         <i />
         <i />
       </div>
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 self-start overflow-y-auto border-e border-border bg-card lg:block">
+      <aside className={cn("sticky top-0 hidden h-screen w-64 shrink-0 self-start overflow-y-auto border-e border-border bg-card lg:block", embedded && "lg:hidden")}>
         <SidebarBody />
       </aside>
 
@@ -253,7 +258,7 @@ export function AppShell({
       ) : null}
 
       <div className="relative z-10 flex min-w-0 flex-1 flex-col">
-        <header className="app-topbar sticky top-0 z-30 px-2 pt-2 sm:px-4 sm:pt-3">
+        <header className={cn("app-topbar sticky top-0 z-30 px-2 pt-2 sm:px-4 sm:pt-3", embedded && "hidden")}>
           <div className="app-topbar-inner flex min-h-14 items-center gap-2 px-2 py-1.5 sm:gap-2.5 sm:px-3">
             <button
               className="grid size-10 shrink-0 place-items-center rounded-xl border border-border lg:hidden"
@@ -281,7 +286,7 @@ export function AppShell({
             </div>
           </div>
         </header>
-        <GuestBar />
+        {embedded ? null : <GuestBar />}
         <main className={padded ? "mx-auto w-full max-w-[100rem] px-3.5 py-5 sm:px-5 sm:py-7" : ""}>
           {children}
         </main>

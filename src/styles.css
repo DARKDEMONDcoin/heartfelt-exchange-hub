@@ -13300,6 +13300,12 @@ section:has(> .integration-grid-wave) {
   border: 0;
   background: var(--background);
 }
+.app-shell.is-embedded > .sahl-smoke {
+  display: none;
+}
+.app-shell.is-embedded main {
+  padding: 1rem;
+}
 @media (max-width: 640px) {
   .chat-message-column {
     padding-bottom: 8.25rem;

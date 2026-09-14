@@ -575,6 +575,7 @@ function ChatView({
   const { data: profile } = useProfile();
   const { data: conversations } = useConversations(workspace?.id, id);
   const [conversationId, setConversationId] = useState<string | undefined>();
+  const [startingNewConversation, setStartingNewConversation] = useState(false);
   const createConversation = useCreateConversation(workspace?.id, id);
   const renameConversation = useRenameConversation(workspace?.id, id);
   const deleteConversation = useDeleteConversation(workspace?.id, id);
@@ -607,8 +608,9 @@ function ChatView({
   const [postLength, setPostLength] = useState<"auto" | "short" | "medium" | "long">("auto");
 
   useEffect(() => {
-    if (!conversationId && conversations?.[0]) setConversationId(conversations[0].id);
-  }, [conversationId, conversations]);
+    if (!startingNewConversation && !conversationId && conversations?.[0])
+      setConversationId(conversations[0].id);
+  }, [conversationId, conversations, startingNewConversation]);
 
   /** لوحات الشريط العلوي — تُفتح كلها داخل نفس الصفحة. */
   const [barPanel, setBarPanel] = useState<"apps" | "brand" | "chats" | "work" | null>(null);
@@ -646,8 +648,12 @@ function ChatView({
 
   const send = useMutation({
     mutationFn: async (message: string) => {
-      const activeConversationId = conversationId ?? (await createConversation.mutateAsync()).id;
+      const activeConversationId =
+        startingNewConversation || !conversationId
+          ? (await createConversation.mutateAsync()).id
+          : conversationId;
       if (!conversationId) setConversationId(activeConversationId);
+      setStartingNewConversation(false);
       const result = await ask({
         data: {
           workspaceId: workspace!.id,
@@ -698,8 +704,12 @@ function ChatView({
 
   const skillRun = useMutation({
     mutationFn: async (p: { skill: Skill; values: Record<string, string> }) => {
-      const activeConversationId = conversationId ?? (await createConversation.mutateAsync()).id;
+      const activeConversationId =
+        startingNewConversation || !conversationId
+          ? (await createConversation.mutateAsync()).id
+          : conversationId;
       if (!conversationId) setConversationId(activeConversationId);
+      setStartingNewConversation(false);
       return runSkillFn({
         data: {
           workspaceId: workspace!.id,
@@ -840,6 +850,7 @@ function ChatView({
           <button
             type="button"
             onClick={() => {
+              setStartingNewConversation(true);
               setConversationId(undefined);
               setBarPanel(null);
               setDraft("");
@@ -1411,6 +1422,7 @@ function ChatView({
                     type="button"
                     disabled={!workspace}
                     onClick={() => {
+                      setStartingNewConversation(true);
                       setConversationId(undefined);
                       setBarPanel(null);
                       setDraft("");
@@ -1435,6 +1447,7 @@ function ChatView({
                         <button
                           type="button"
                           onClick={() => {
+                            setStartingNewConversation(false);
                             setConversationId(conversation.id);
                             setBarPanel(null);
                           }}
