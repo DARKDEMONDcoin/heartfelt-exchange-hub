@@ -14,15 +14,17 @@ import {
   Trash2,
   History,
   X,
-  ArrowUpLeft,
   Fingerprint,
   SlidersHorizontal,
-  ChevronDown,
   BookOpenText,
   AudioLines,
   PlugZap,
   ImagePlus,
   TextCursorInput,
+  Search,
+  CalendarDays,
+  Bot,
+  ListChecks,
 } from "lucide-react";
 
 import { AppShell } from "@/components/app/AppShell";
@@ -41,7 +43,6 @@ import {
   useRenameConversation,
   useWorkspace,
 } from "@/lib/data";
-import { SiteBadgeBar } from "@/components/app/SiteBadge";
 import { askEmployee, runSkill } from "@/lib/ai.functions";
 import { SkillPalette } from "@/components/app/SkillPalette";
 import { Thinking } from "@/components/app/Thinking";
@@ -85,6 +86,17 @@ function dayLabel(iso: string) {
   if (same(d, today)) return "اليوم";
   if (same(d, yesterday)) return "أمس";
   return d.toLocaleDateString("ar", { weekday: "long", day: "numeric", month: "long" });
+}
+
+function conversationDate(iso: string) {
+  return new Intl.DateTimeFormat("ar-EG", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(iso));
 }
 
 function CopyButton({ text }: { text: string }) {
@@ -465,124 +477,6 @@ function useTypewriter(lines: string[], pause = 1700) {
   return lines[line]?.slice(0, length) ?? "";
 }
 
-/** منتقي المحادثات داخل الشريط الثابت: تبديل · تسمية · حذف · محادثة جديدة. */
-function ThreadPicker({
-  conversations,
-  conversationId,
-  onSelect,
-  onCreate,
-  onRename,
-  onDelete,
-  creating,
-}: {
-  conversations: { id: string; title: string }[];
-  conversationId: string | undefined;
-  onSelect: (id: string) => void;
-  onCreate: () => void;
-  onRename: (id: string, title: string) => void;
-  onDelete: (id: string) => void;
-  creating: boolean;
-}) {
-  const [open, setOpen] = useState(false);
-  const boxRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!boxRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  const active = conversations.find((c) => c.id === conversationId);
-
-  return (
-    <div className="chat-thread-picker" ref={boxRef}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-label="المحادثات"
-        title="محادثات هذا الموظف"
-        className="chat-thread-trigger"
-      >
-        <History className="size-3.5 shrink-0" />
-        <span>{active?.title ?? "محادثة جديدة"}</span>
-        <ChevronDown
-          className={cn("size-3.5 shrink-0 transition-transform", open && "rotate-180")}
-        />
-      </button>
-      {open ? (
-        <div className="chat-thread-menu" role="menu">
-          <div className="flex items-center justify-between gap-2 border-b border-border/70 px-3 py-2">
-            <p className="text-[0.68rem] font-bold text-muted-foreground">المحادثات</p>
-            <button
-              type="button"
-              onClick={onCreate}
-              disabled={creating}
-              className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[0.68rem] font-bold transition-colors hover:bg-secondary disabled:opacity-50"
-            >
-              {creating ? <Loader2 className="size-3 animate-spin" /> : <Plus className="size-3" />}
-              جديدة
-            </button>
-          </div>
-          <div className="chat-thread-menu-list">
-            {conversations.length ? (
-              conversations.map((conversation) => (
-                <div
-                  key={conversation.id}
-                  className={cn(
-                    "chat-thread-row group",
-                    conversation.id === conversationId && "is-active",
-                  )}
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onSelect(conversation.id);
-                      setOpen(false);
-                    }}
-                    onDoubleClick={() => {
-                      const title = window.prompt("اسم المحادثة", conversation.title)?.trim();
-                      if (title) onRename(conversation.id, title);
-                    }}
-                    className="min-w-0 flex-1 truncate px-2 py-2 text-start text-[0.78rem] font-semibold"
-                    title="انقر مرتين لإعادة التسمية"
-                  >
-                    {conversation.title}
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="حذف المحادثة"
-                    title="حذف المحادثة"
-                    onClick={() => {
-                      if (window.confirm("حذف هذه المحادثة ورسائلها؟")) onDelete(conversation.id);
-                    }}
-                    className="grid size-7 shrink-0 place-items-center rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-coral/10 hover:text-coral group-hover:opacity-100 focus:opacity-100"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
-                </div>
-              ))
-            ) : (
-              <p className="px-3 py-4 text-center text-xs text-muted-foreground">
-                لا توجد محادثات بعد.
-              </p>
-            )}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
 function ChatPage() {
   const { id } = Route.useParams();
   const member = getMember(id)!;
@@ -640,23 +534,12 @@ function ChatPage() {
     createConversation.mutate(undefined, { onSuccess: (row) => setConversationId(row.id) });
   }, [workspace, conversations, createConversation]);
 
-  const [showSettings, setShowSettings] = useState(false);
   /** لوحات الشريط العلوي — تُفتح كلها داخل نفس الصفحة. */
-  const [barPanel, setBarPanel] = useState<"apps" | "brand" | null>(null);
+  const [barPanel, setBarPanel] = useState<"apps" | "brand" | "chats" | "work" | null>(null);
   const [brandSource, setBrandSource] = useState("");
-  const [sidePanelTab, setSidePanelTab] = useState<"chats" | "actions" | "accounts">("chats");
+  const [conversationSearch, setConversationSearch] = useState("");
   const [toolsOpen, setToolsOpen] = useState(false);
   const [activeTool, setActiveTool] = useState<"media" | "length" | null>(null);
-  /** تلميح صوت العلامة اختياري تماماً — يُخفى نهائياً بضغطة واحدة. */
-  const [voiceHintHidden, setVoiceHintHidden] = useState(true);
-  useEffect(() => {
-    setVoiceHintHidden(localStorage.getItem("sahl:voice-hint-hidden") === "1");
-  }, []);
-  const dismissVoiceHint = () => {
-    localStorage.setItem("sahl:voice-hint-hidden", "1");
-    setVoiceHintHidden(true);
-  };
-
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   /** يصير true عند إيقاف الطلب بعد الإرسال — فنتجاهل نتيجته. */
@@ -675,6 +558,11 @@ function ChatPage() {
   const [pendingText, setPendingText] = useState<string | null>(null);
 
   const owned = (integrations ?? []).filter((i) => i.employee_id === id);
+  const filteredConversations = (conversations ?? []).filter((conversation) =>
+    conversation.title
+      .toLocaleLowerCase("ar")
+      .includes(conversationSearch.trim().toLocaleLowerCase("ar")),
+  );
   const wpConnected = (integrations ?? []).some(
     (i) => i.provider === "wordpress" && i.status === "connected",
   );
@@ -831,13 +719,22 @@ function ChatPage() {
           </button>
           <button
             type="button"
+            onClick={() => setBarPanel((v) => (v === "work" ? null : "work"))}
+            aria-expanded={barPanel === "work"}
+            title={`تشغيل ومتابعة ${member.name}`}
+            className={cn("topbar-pill", barPanel === "work" && "is-active")}
+          >
+            <Bot className="size-4 shrink-0" />
+            <span>التشغيل</span>
+          </button>
+          <button
+            type="button"
             onClick={() => {
-              setBarPanel(null);
-              setShowSettings((v) => !v);
+              setBarPanel((v) => (v === "chats" ? null : "chats"));
             }}
-            aria-expanded={showSettings}
+            aria-expanded={barPanel === "chats"}
             title={`محادثات ${member.name}`}
-            className={cn("topbar-pill", showSettings && "is-active")}
+            className={cn("topbar-pill", barPanel === "chats" && "is-active")}
           >
             <History className="size-4 shrink-0" />
             <span>المحادثات</span>
@@ -865,7 +762,10 @@ function ChatPage() {
     >
       <div className="chat-command-layout">
         <div
-          className="chat-stage relative flex min-h-[calc(100dvh-4rem)] min-w-0 flex-col"
+          className={cn(
+            "chat-stage relative flex min-h-[calc(100dvh-4rem)] min-w-0 flex-col",
+            ((messages ?? []).length > 0 || pending) && "is-engaged",
+          )}
           style={
             {
               "--chat-accent": member.tint,
@@ -873,56 +773,17 @@ function ChatPage() {
             } as React.CSSProperties
           }
         >
-          <div className="chat-smoke" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-            <b />
-            <b />
-            <b />
-          </div>
+          {(messages ?? []).length === 0 && !pending ? (
+            <div className="chat-smoke" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <b />
+              <b />
+              <b />
+            </div>
+          ) : null}
           <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 sm:px-6">
-            <SiteBadgeBar
-              website={(workspace as { website?: string | null } | undefined)?.website ?? null}
-            />
-            {brainItems &&
-            !hasVoiceGuide &&
-            !voiceHintHidden &&
-            ["sonny", "nour", "eva", "dana"].includes(id) ? (
-              <div className="group flex items-center gap-3 rounded-2xl border border-dashed border-border bg-secondary/40 px-4 py-3 text-sm">
-                <span
-                  className="grid size-9 shrink-0 place-items-center rounded-xl text-primary-foreground"
-                  style={{ backgroundImage: "var(--gradient-aurora)" }}
-                >
-                  <Fingerprint className="size-4" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-bold">
-                    اختياري: خلّي {member.name} يكتب بصوت علامتك
-                  </span>
-                  <span className="block text-xs text-muted-foreground">
-                    يعمل بكفاءة كاملة بدونها — وإن أردت دقة أعلى الصق رابط موقعك مرة واحدة في عقل
-                    العلامة.
-                  </span>
-                </span>
-                <Link
-                  to="/app/brain"
-                  className="hidden shrink-0 items-center gap-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-bold transition-colors hover:bg-secondary sm:inline-flex"
-                >
-                  فعّلها <ArrowUpLeft className="size-3.5 text-primary" />
-                </Link>
-                <button
-                  type="button"
-                  aria-label="إخفاء"
-                  title="إخفاء"
-                  onClick={dismissVoiceHint}
-                  className="grid size-8 shrink-0 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                >
-                  <X className="size-4" />
-                </button>
-              </div>
-            ) : null}
-
             {(messages ?? []).length === 0 && !pending ? (
               <div className="chat-welcome animate-pop-in">
                 <div className="chat-welcome-portraits" aria-hidden="true">
@@ -1275,20 +1136,44 @@ function ChatPage() {
             />
             <section
               className="topbar-sheet"
-              aria-label={barPanel === "apps" ? `تكاملات ${member.name}` : "عقل وصوت العلامة"}
+              aria-label={
+                barPanel === "apps"
+                  ? `تكاملات ${member.name}`
+                  : barPanel === "brand"
+                    ? "عقل وصوت العلامة"
+                    : barPanel === "chats"
+                      ? `محادثات ${member.name}`
+                      : `تشغيل ومتابعة ${member.name}`
+              }
             >
               <div className="topbar-sheet-head">
                 {barPanel === "apps" ? (
                   <PlugZap className="size-4 text-primary" />
+                ) : barPanel === "chats" ? (
+                  <History className="size-4 text-primary" />
+                ) : barPanel === "work" ? (
+                  <Bot className="size-4 text-primary" />
                 ) : (
                   <Fingerprint className="size-4 text-primary" />
                 )}
                 <div>
-                  <p>{barPanel === "apps" ? `تكاملات ${member.name}` : "عقل وصوت العلامة"}</p>
+                  <p>
+                    {barPanel === "apps"
+                      ? `تكاملات ${member.name}`
+                      : barPanel === "brand"
+                        ? "عقل وصوت العلامة"
+                        : barPanel === "chats"
+                          ? `محادثات ${member.name}`
+                          : `تشغيل ومتابعة ${member.name}`}
+                  </p>
                   <span>
                     {barPanel === "apps"
                       ? "اربط الحسابات التي يحتاجها من هنا مباشرة"
-                      : "المصادر التي يقرأها ونبرة كتابته"}
+                      : barPanel === "brand"
+                        ? "المصادر التي يقرأها ونبرة كتابته"
+                        : barPanel === "chats"
+                          ? "ابحث وبدّل وأدر السجل من هنا"
+                          : "كل ما يستطيع تنفيذه ومتابعته"}
                   </span>
                 </div>
                 <button type="button" onClick={() => setBarPanel(null)} aria-label="إغلاق">
@@ -1321,7 +1206,7 @@ function ChatPage() {
                     );
                   })}
                 </div>
-              ) : (
+              ) : barPanel === "brand" ? (
                 <div className="mt-3 space-y-3">
                   <div className="rounded-2xl border border-border/70 p-3">
                     <p className="flex items-center gap-2 text-xs font-black">
@@ -1385,169 +1270,126 @@ function ChatPage() {
                     </div>
                   </div>
                 </div>
+              ) : barPanel === "chats" ? (
+                <div className="chat-history-sheet">
+                  <label className="chat-history-search">
+                    <Search className="size-4" />
+                    <input
+                      value={conversationSearch}
+                      onChange={(event) => setConversationSearch(event.target.value)}
+                      placeholder="ابحث في المحادثات…"
+                      aria-label="البحث في المحادثات"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    disabled={!workspace || createConversation.isPending}
+                    onClick={() =>
+                      createConversation.mutate(undefined, {
+                        onSuccess: (row) => {
+                          setConversationId(row.id);
+                          setBarPanel(null);
+                        },
+                      })
+                    }
+                    className="chat-history-new"
+                  >
+                    {createConversation.isPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Plus className="size-4" />
+                    )}
+                    محادثة جديدة
+                  </button>
+                  <div className="chat-history-list">
+                    {filteredConversations.map((conversation) => (
+                      <article
+                        key={conversation.id}
+                        className={cn(
+                          "chat-history-row",
+                          conversation.id === conversationId && "is-active",
+                        )}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setConversationId(conversation.id);
+                            setBarPanel(null);
+                          }}
+                          onDoubleClick={() => {
+                            const title = window.prompt("اسم المحادثة", conversation.title)?.trim();
+                            if (title) renameConversation.mutate({ id: conversation.id, title });
+                          }}
+                        >
+                          <strong>{conversation.title}</strong>
+                          <time dateTime={conversation.updated_at}>
+                            <CalendarDays className="size-3.5" />
+                            {conversationDate(conversation.updated_at)}
+                          </time>
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`حذف ${conversation.title}`}
+                          onClick={() => {
+                            if (window.confirm("حذف هذه المحادثة ورسائلها؟"))
+                              deleteConversation.mutate(conversation.id);
+                          }}
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </article>
+                    ))}
+                    {!filteredConversations.length ? (
+                      <p className="chat-history-empty">لا توجد محادثة تطابق البحث.</p>
+                    ) : null}
+                  </div>
+                </div>
+              ) : (
+                <div className="chat-work-sheet">
+                  <ActionPanel
+                    employeeId={id}
+                    workspaceId={workspace?.id}
+                    connected={(integrations ?? [])
+                      .filter((integration) => integration.status === "connected")
+                      .map((integration) => integration.provider)}
+                  />
+                  <div className="chat-work-links">
+                    <Link to="/app/tasks">
+                      <ListChecks className="size-4" />
+                      <span>المهام</span>
+                    </Link>
+                    <Link to="/app/automations">
+                      <Bot className="size-4" />
+                      <span>الجدولة التلقائية</span>
+                    </Link>
+                    <Link to="/app/approvals">
+                      <Check className="size-4" />
+                      <span>الموافقات</span>
+                    </Link>
+                    {id === "sonny" ? (
+                      <Link to="/app/calendar">
+                        <CalendarDays className="size-4" />
+                        <span>تقويم المحتوى</span>
+                      </Link>
+                    ) : null}
+                    {id === "sonny" ? (
+                      <Link to="/app/queue">
+                        <History className="size-4" />
+                        <span>طابور النشر</span>
+                      </Link>
+                    ) : null}
+                    {id === "sonny" ? (
+                      <Link to="/app/autopilot">
+                        <Bot className="size-4" />
+                        <span>الطيار الآلي</span>
+                      </Link>
+                    ) : null}
+                  </div>
+                </div>
               )}
             </section>
           </>
         ) : null}
-
-        {showSettings ? (
-          <button
-            type="button"
-            aria-label="إغلاق لوحة المحادثات"
-            onClick={() => setShowSettings(false)}
-            className="chat-thread-backdrop"
-          />
-        ) : null}
-        <aside className={cn("chat-thread-panel", showSettings ? "is-open" : "")}>
-          <div className="chat-side-employee">
-            <span className="relative block size-14 shrink-0 overflow-hidden rounded-xl">
-              <Portrait memberId={member.id} name={member.name} className="size-full" />
-              <span className="absolute bottom-1 end-1 size-2.5 rounded-full border-2 border-card bg-primary" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-base font-black">{member.name}</span>
-              <span className="block truncate text-xs text-muted-foreground">{member.role}</span>
-            </span>
-            <button type="button" onClick={() => setShowSettings(false)} aria-label="إغلاق القائمة">
-              <X className="size-4" />
-            </button>
-          </div>
-          <nav className="chat-side-tabs" aria-label="أقسام لوحة الموظف">
-            {(
-              [
-                ["chats", "المحادثات"],
-                ["actions", "التنفيذ"],
-                ["accounts", "الحسابات"],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setSidePanelTab(value)}
-                className={cn(sidePanelTab === value && "is-active")}
-              >
-                {label}
-              </button>
-            ))}
-          </nav>
-          {sidePanelTab === "accounts" && owned.length ? (
-            <section className="chat-side-section">
-              <p className="chat-side-label">حسابات {member.name}</p>
-              <div className="chat-side-accounts">
-                {owned.map((integration) => (
-                  <span
-                    key={integration.id}
-                    className="flex min-w-0 items-center gap-2 rounded-lg border border-border/70 p-2 text-xs font-bold"
-                  >
-                    <AppIcon name={integration.provider} className="size-5 shrink-0" />
-                    <span className="truncate">{appLabel(integration.provider)}</span>
-                    <span
-                      className={cn(
-                        "ms-auto size-1.5 shrink-0 rounded-full",
-                        integration.status === "connected"
-                          ? "bg-primary"
-                          : "bg-muted-foreground/40",
-                      )}
-                    />
-                  </span>
-                ))}
-              </div>
-            </section>
-          ) : null}
-          {sidePanelTab === "chats" ? (
-            <div className="chat-side-section">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="font-display font-black">محادثات {member.name}</h2>
-                <button
-                  type="button"
-                  aria-label="محادثة جديدة"
-                  title="محادثة جديدة"
-                  disabled={!workspace || createConversation.isPending}
-                  onClick={() =>
-                    createConversation.mutate(undefined, {
-                      onSuccess: (row) => setConversationId(row.id),
-                    })
-                  }
-                  className="grid size-9 place-items-center rounded-xl border border-border transition-colors hover:bg-secondary disabled:opacity-50"
-                >
-                  {createConversation.isPending ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Plus className="size-4" />
-                  )}
-                </button>
-              </div>
-              <div className="mt-3 max-h-[45dvh] space-y-1 overflow-y-auto">
-                {(conversations ?? []).map((conversation) => (
-                  <div
-                    key={conversation.id}
-                    className={cn(
-                      "chat-side-thread group",
-                      conversation.id === conversationId
-                        ? "border-primary/40 bg-primary/10"
-                        : "border-transparent hover:bg-secondary/70",
-                    )}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setConversationId(conversation.id)}
-                      onDoubleClick={() => {
-                        const title = window.prompt("اسم المحادثة", conversation.title)?.trim();
-                        if (title) renameConversation.mutate({ id: conversation.id, title });
-                      }}
-                      className="min-w-0 flex-1 truncate px-2 py-1 text-start text-sm font-semibold"
-                      title="انقر مرتين لإعادة التسمية"
-                    >
-                      {conversation.title}
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="حذف المحادثة"
-                      title="حذف المحادثة"
-                      onClick={() => {
-                        if (window.confirm("حذف هذه المحادثة ورسائلها؟"))
-                          deleteConversation.mutate(conversation.id);
-                      }}
-                      className="grid size-7 shrink-0 place-items-center rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-coral/10 hover:text-coral group-hover:opacity-100 focus:opacity-100"
-                    >
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-          {sidePanelTab === "actions" ? (
-            <section className="chat-side-section">
-              <p className="chat-side-label mb-3">التنفيذ والمتابعة</p>
-              <ActionPanel
-                employeeId={id}
-                workspaceId={workspace?.id}
-                connected={(integrations ?? [])
-                  .filter((i) => i.status === "connected")
-                  .map((i) => i.provider)}
-              />
-            </section>
-          ) : null}
-          <div className="chat-side-links">
-            <button
-              type="button"
-              onClick={() => {
-                setShowSettings(false);
-                setBarPanel("apps");
-              }}
-            >
-              <PlugZap className="size-4" />
-              <span>
-                كل التكاملات
-                <small>
-                  {owned.filter((item) => item.status === "connected").length} حسابات متصلة
-                </small>
-              </span>
-              <ArrowUpLeft className="size-3.5" />
-            </button>
-          </div>
-        </aside>
       </div>
     </AppShell>
   );

@@ -86,8 +86,7 @@ function jsonToMarkdown(node: unknown, depth = 0): string {
         const rendered = jsonToMarkdown(value, depth + 1);
         if (!rendered) return "";
         const heading = "#".repeat(Math.min(depth + 2, 6));
-        if (typeof value === "object")
-          return `${heading} ${labelFor(key)}\n\n${rendered}`;
+        if (typeof value === "object") return `${heading} ${labelFor(key)}\n\n${rendered}`;
         if (rendered.includes("\n")) return `**${labelFor(key)}:**\n\n${rendered}`;
         return `**${labelFor(key)}:** ${rendered}`;
       })
@@ -154,8 +153,6 @@ const input = z.object({
   /** طول المنشور المطلوب (اختياري) — «تلقائي» يترك القرار للموظف حسب المنصة. */
   postLength: z.enum(["auto", "short", "medium", "long"]).optional(),
 });
-
-
 
 /** الموظفون الذين تُولَّد لهم صورة فعلية عند وجود وصف بصري في الرد. */
 const VISUAL_EMPLOYEES = new Set(["dana", "sonny", "nour"]);
@@ -287,9 +284,18 @@ export const askEmployee = createServerFn({ method: "POST" })
       );
     }
     if (conversation.title === "محادثة جديدة") {
+      const cleanTitle = data.message
+        .replace(/https?:\/\/\S+/g, "")
+        .replace(/[\n\r]+/g, " ")
+        .replace(/^[\s،,:؛.!؟-]+|[\s،,:؛.!؟-]+$/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
       await supabase
         .from("conversations")
-        .update({ title: data.message.replace(/\s+/g, " ").slice(0, 55) })
+        .update({
+          title: cleanTitle.slice(0, 55) || "محادثة جديدة",
+          updated_at: new Date().toISOString(),
+        })
         .eq("id", data.conversationId);
     } else {
       await supabase
@@ -327,7 +333,6 @@ export const askEmployee = createServerFn({ method: "POST" })
         ? liveFactsBlock(data.message).catch(() => "")
         : Promise.resolve(""),
     ]);
-
 
     // المنصة التي سمّاها المستخدم بنفسه — تُحترم حرفياً ولا تُبدَّل بغيرها.
     const { requestedPublishTargets, providerLabel } = await import("./platforms");
@@ -457,8 +462,8 @@ export const askEmployee = createServerFn({ method: "POST" })
         : "",
       'أعد ردك بصيغة JSON فقط بالشكل: {"reply": "نص ردك للمستخدم بصيغة Markdown", "deliverable": {"title": "عنوان المخرج", "kind": "نوع المخرج", "channel": "المنصة", "body": "نص المخرج الجاهز", "scheduled": "متى يُنفّذ", "image_prompt": "English visual prompt or null"} , "needs_connection": {"provider": "معرّف المنصة مثل instagram أو wordpress أو search-console", "reason": "سبب من 8 كلمات مرتبط بهذه المهمة"} }',
       'ممنوع تماماً ابتكار بنية JSON أخرى. إن طلب المستخدم عدة مخرجات (خطة أسبوع، عدة منشورات، عدة منصات) فاستخدم مصفوفة "deliverables": [ {نفس حقول deliverable}, … ] بدل deliverable، واجعل "reply" ملخصاً بالعربية للخطة (المحاور، التوزيع، مؤشرات القياس) — ولا تضع JSON داخل reply أو داخل body إطلاقاً.',
-      'قاعدة إلزامية للخطط: عنصر واحد في deliverables لكل منشور فعلي (يوم × منصة). خطة 3 أيام على 3 منصات = 9 عناصر، لكل عنصر channel صحيح (instagram / linkedin / x) وtitle يذكر اليوم والمنصة وbody يحتوي نص ذلك المنشور وحده مع هاشتاجاته وscheduled بأفضل وقت نشر. ممنوع وضع ملخص الخطة داخل body أو الاكتفاء بمخرج واحد.',
-      'حقل body يجب أن يكون نص المنشور/المقال الجاهز للنشر كما يقرأه الجمهور فقط — بلا مفاتيح ولا أقواس ولا وصف الصورة. ووصف الصورة الإنجليزي يوضع في image_prompt وحده ولا يظهر للمستخدم.',
+      "قاعدة إلزامية للخطط: عنصر واحد في deliverables لكل منشور فعلي (يوم × منصة). خطة 3 أيام على 3 منصات = 9 عناصر، لكل عنصر channel صحيح (instagram / linkedin / x) وtitle يذكر اليوم والمنصة وbody يحتوي نص ذلك المنشور وحده مع هاشتاجاته وscheduled بأفضل وقت نشر. ممنوع وضع ملخص الخطة داخل body أو الاكتفاء بمخرج واحد.",
+      "حقل body يجب أن يكون نص المنشور/المقال الجاهز للنشر كما يقرأه الجمهور فقط — بلا مفاتيح ولا أقواس ولا وصف الصورة. ووصف الصورة الإنجليزي يوضع في image_prompt وحده ولا يظهر للمستخدم.",
       'إن لم يطلب المستخدم مخرجاً جاهزاً للنشر أو الإرسال، اجعل "deliverable" القيمة null. واجعل "needs_connection" القيمة null إلا إذا كانت هذه المهمة تحديداً تحتاج حساباً غير مربوط لتنفيذها فعلياً (نشر/إرسال/قراءة بيانات حقيقية).',
       `المنصة الافتراضية لك هي ${persona.channel} ونوع مخرجك الشائع ${persona.kind}.`,
     ]
@@ -528,7 +533,6 @@ export const askEmployee = createServerFn({ method: "POST" })
     }
 
     let raw = campaign
-
       ? JSON.stringify({ reply: campaign.reply, deliverables: campaign.deliverables })
       : await freeChat(
           apiKey,
@@ -543,7 +547,6 @@ export const askEmployee = createServerFn({ method: "POST" })
             ? { json: true, timeoutMs: 75_000, maxTokens: 6000, budgetMs: 130_000 }
             : { json: true, timeoutMs: 40_000, maxTokens: 1800, budgetMs: 100_000 },
         );
-
 
     let reply = raw;
     let deliverables: Deliverable[] = [];
@@ -669,7 +672,8 @@ export const askEmployee = createServerFn({ method: "POST" })
         // نُبقي نص المحادثة متطابقاً مع المخرج المحسّن بدل عرض نسختين مختلفتين.
         fixed.forEach((d, i) => {
           const old = before[i] ?? "";
-          if (old && d.body && d.body !== old && reply.includes(old)) reply = reply.replace(old, d.body);
+          if (old && d.body && d.body !== old && reply.includes(old))
+            reply = reply.replace(old, d.body);
         });
         deliverables = fixed;
       } catch (error) {
@@ -731,7 +735,6 @@ export const askEmployee = createServerFn({ method: "POST" })
       }
     }
 
-
     // مخرج واحد جاهز للنشر: نص المنشور نفسه هو أهم ما يراه المستخدم — نضعه في صدر الرد
     // ونضع تعليق الموظف بعده خلف فاصل، حتى تلتقطه لوحة النشر نظيفاً بلا كلام موظف.
     if (deliverables.length === 1) {
@@ -771,54 +774,60 @@ export const askEmployee = createServerFn({ method: "POST" })
         data.message ?? "",
       );
     let siteSuggestions: { url: string; alt: string; pageUrl: string }[] = [];
-    if (wantsSiteImages) try {
-      const { data: stored } = await supabase
-        .from("site_assets")
-        .select("url, alt, page_url, weight")
-        .eq("workspace_id", data.workspaceId)
-        .order("weight", { ascending: false })
-        .limit(120);
+    if (wantsSiteImages)
+      try {
+        const { data: stored } = await supabase
+          .from("site_assets")
+          .select("url, alt, page_url, weight")
+          .eq("workspace_id", data.workspaceId)
+          .order("weight", { ascending: false })
+          .limit(120);
 
-      let pool = (stored ?? []).map((a) => ({
-        url: a.url,
-        alt: a.alt ?? "",
-        pageUrl: a.page_url ?? "",
-        weight: a.weight ?? 0,
-      }));
-
-      // أول مرة: نلتقط صور الموقع الآن ثم نحفظها للمرات القادمة.
-      if (!pool.length && workspace?.website) {
-        const { harvestSiteImages } = await import("./brand-assets.server");
-        const found = await harvestSiteImages(workspace.website, 10);
-        if (found.length) {
-          await supabase.from("site_assets").upsert(
-            found.map((a) => ({
-              workspace_id: data.workspaceId,
-              url: a.url,
-              page_url: a.pageUrl,
-              alt: a.alt || null,
-              weight: a.weight,
-              source: "website",
-              kind: "image",
-            })),
-            { onConflict: "workspace_id,url" },
-          );
-          pool = found.map((a) => ({ url: a.url, alt: a.alt, pageUrl: a.pageUrl, weight: a.weight }));
-        }
-      }
-
-      if (pool.length) {
-        const { rankAssets } = await import("./brand-assets.server");
-        const query = `${data.message}\n${deliverables.map((d) => `${d.title ?? ""} ${d.body ?? ""}`).join("\n")}`;
-        siteSuggestions = rankAssets(query, pool, 12).map((a) => ({
+        let pool = (stored ?? []).map((a) => ({
           url: a.url,
-          alt: a.alt,
-          pageUrl: a.pageUrl,
+          alt: a.alt ?? "",
+          pageUrl: a.page_url ?? "",
+          weight: a.weight ?? 0,
         }));
+
+        // أول مرة: نلتقط صور الموقع الآن ثم نحفظها للمرات القادمة.
+        if (!pool.length && workspace?.website) {
+          const { harvestSiteImages } = await import("./brand-assets.server");
+          const found = await harvestSiteImages(workspace.website, 10);
+          if (found.length) {
+            await supabase.from("site_assets").upsert(
+              found.map((a) => ({
+                workspace_id: data.workspaceId,
+                url: a.url,
+                page_url: a.pageUrl,
+                alt: a.alt || null,
+                weight: a.weight,
+                source: "website",
+                kind: "image",
+              })),
+              { onConflict: "workspace_id,url" },
+            );
+            pool = found.map((a) => ({
+              url: a.url,
+              alt: a.alt,
+              pageUrl: a.pageUrl,
+              weight: a.weight,
+            }));
+          }
+        }
+
+        if (pool.length) {
+          const { rankAssets } = await import("./brand-assets.server");
+          const query = `${data.message}\n${deliverables.map((d) => `${d.title ?? ""} ${d.body ?? ""}`).join("\n")}`;
+          siteSuggestions = rankAssets(query, pool, 12).map((a) => ({
+            url: a.url,
+            alt: a.alt,
+            pageUrl: a.pageUrl,
+          }));
+        }
+      } catch (e) {
+        console.error("[site-assets] suggestion failed:", e);
       }
-    } catch (e) {
-      console.error("[site-assets] suggestion failed:", e);
-    }
 
     if (siteSuggestions.length) {
       const gallery = siteSuggestions
