@@ -1037,7 +1037,9 @@ function ChatView({
                             isUser ? "text-background/60" : "text-muted-foreground",
                           )}
                         >
-                          <span>{timeOf(m.created_at)}</span>
+                          <span className="whitespace-nowrap tabular-nums" dir="ltr">
+                            {timeOf(m.created_at)}
+                          </span>
                           {!isUser ? (
                             <span className="ms-auto opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
                               <MessageActions
