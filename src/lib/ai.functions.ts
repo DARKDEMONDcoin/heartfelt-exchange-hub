@@ -287,9 +287,15 @@ export const askEmployee = createServerFn({ method: "POST" })
       );
     }
     if (conversation.title === "محادثة جديدة") {
+      const cleanTitle = data.message
+        .replace(/https?:\/\/\S+/g, "")
+        .replace(/[\n\r]+/g, " ")
+        .replace(/^[\s،,:؛.!؟-]+|[\s،,:؛.!؟-]+$/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
       await supabase
         .from("conversations")
-        .update({ title: data.message.replace(/\s+/g, " ").slice(0, 55) })
+        .update({ title: cleanTitle.slice(0, 55) || "محادثة جديدة", updated_at: new Date().toISOString() })
         .eq("id", data.conversationId);
     } else {
       await supabase

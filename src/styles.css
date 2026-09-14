@@ -12954,20 +12954,16 @@ section:has(> .integration-grid-wave) {
 
 /* الشريط العلوي العائم: حبة واحدة دائرية الأطراف تحمل كل أزرار الموظف. */
 .app-topbar {
-  background: linear-gradient(
-    to bottom,
-    color-mix(in oklab, var(--background) 92%, transparent),
-    transparent
-  );
+  background: transparent;
 }
 .app-topbar-inner {
   border: 1px solid color-mix(in oklab, var(--gold) 16%, var(--border));
   border-radius: 999px;
-  background: color-mix(in oklab, var(--background) 72%, transparent);
+  background: color-mix(in oklab, var(--background) 28%, transparent);
   box-shadow:
     0 1px 0 0 color-mix(in oklab, var(--cream) 60%, transparent) inset,
     0 24px 48px -38px var(--foreground);
-  backdrop-filter: blur(26px) saturate(1.25);
+  backdrop-filter: blur(10px) saturate(1.08);
 }
 @media (max-width: 640px) {
   .app-topbar-inner {
@@ -13027,8 +13023,8 @@ section:has(> .integration-grid-wave) {
   position: fixed;
   inset: 0;
   z-index: 44;
-  background: color-mix(in oklab, var(--foreground) 12%, transparent);
-  backdrop-filter: blur(2px);
+  background: transparent;
+  backdrop-filter: none;
 }
 .topbar-sheet {
   position: fixed;
@@ -13045,6 +13041,134 @@ section:has(> .integration-grid-wave) {
   box-shadow: 0 40px 80px -50px var(--foreground);
   backdrop-filter: blur(30px) saturate(1.2);
   animation: pop-in 0.22s ease both;
+}
+
+.chat-history-sheet,
+.chat-work-sheet {
+  margin-top: 0.75rem;
+}
+.chat-history-search {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.65rem;
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  padding-inline: 0.75rem;
+  color: var(--muted-foreground);
+  background: color-mix(in oklab, var(--background) 48%, transparent);
+}
+.chat-history-search input {
+  min-width: 0;
+  flex: 1;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 0.8rem;
+  outline: none;
+}
+.chat-history-new {
+  display: flex;
+  width: 100%;
+  min-height: 2.65rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
+  border-radius: 0.8rem;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+.chat-history-list {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.65rem;
+}
+.chat-history-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 68%, transparent);
+}
+.chat-history-row.is-active {
+  border-radius: 0.75rem;
+  border-color: color-mix(in oklab, var(--primary) 24%, var(--border));
+  background: color-mix(in oklab, var(--primary) 7%, transparent);
+}
+.chat-history-row > button:first-child {
+  min-width: 0;
+  padding: 0.65rem;
+  text-align: start;
+}
+.chat-history-row strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+.chat-history-row time {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+  color: var(--muted-foreground);
+  font-size: 0.64rem;
+}
+.chat-history-row > button:last-child {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 0.6rem;
+  color: var(--muted-foreground);
+}
+.chat-history-row > button:last-child:hover {
+  background: color-mix(in oklab, var(--coral) 10%, transparent);
+  color: var(--coral);
+}
+.chat-history-empty {
+  padding: 1.5rem 0.5rem;
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+.chat-work-sheet .mt-5 {
+  margin-top: 0;
+}
+.chat-work-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+.chat-work-links a {
+  display: flex;
+  min-height: 2.65rem;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding-inline: 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+.chat-work-links a:hover {
+  border-color: color-mix(in oklab, var(--primary) 34%, var(--border));
+  background: color-mix(in oklab, var(--primary) 7%, transparent);
+}
+
+/* الدخان الذهبي يملأ الغلاف ويتحرك سريعاً في مسارات متعددة قبل بدء المحادثة. */
+.chat-smoke i:nth-child(1) { animation-duration: 7s; }
+.chat-smoke i:nth-child(2) { animation-duration: 8.5s; }
+.chat-smoke i:nth-child(3) { animation-duration: 10s; }
+.chat-smoke b:nth-of-type(1) { animation-duration: 5.5s; }
+.chat-smoke b:nth-of-type(2) { animation-duration: 7s; animation-delay: -2s; }
+.chat-smoke b:nth-of-type(3) { animation-duration: 8s; animation-delay: -4s; }
+.chat-stage.is-engaged::before,
+.chat-stage.is-engaged::after {
+  display: none;
 }
 .topbar-sheet-head {
   display: flex;
