@@ -117,8 +117,57 @@ export function MediaStudio({
   });
 
   const attach = (url: string, type: "image" | "video") => {
-    if (attachments.some((a) => a.url === url) || attachments.length >= 8) return;
+    if (attachments.some((a) => a.url === url) || attachments.length >= MAX_ATTACHMENTS) return;
     onAttachmentsChange([...attachments, { url, type }]);
+  };
+
+  /** رفع صور وفيديوهات من جهاز المستخدم (المعرض) إلى مخزن مساحة العمل، حتى ١٠ عناصر. */
+  const uploadFiles = async (files: File[]) => {
+    if (!workspaceId) return setError("اختر مساحة العمل أولاً.");
+    const room = MAX_ATTACHMENTS - attachments.length;
+    if (room <= 0) return setError(`الحد الأقصى ${MAX_ATTACHMENTS} ملفات مع بعض.`);
+    const picked = files.slice(0, room);
+    if (files.length > room) setError(`أرفقنا ${room} ملفات فقط — الحد الأقصى ${MAX_ATTACHMENTS}.`);
+    else setError(null);
+
+    setUploading(picked.length);
+    const added: Attachment[] = [];
+    for (const file of picked) {
+      const isVideo = file.type.startsWith("video/");
+      const isImage = file.type.startsWith("image/");
+      if (!isVideo && !isImage) {
+        setError("اختر صوراً أو فيديوهات فقط.");
+        continue;
+      }
+      if (file.size > MAX_BYTES) {
+        setError(`«${file.name}» أكبر من ٥٠ ميجابايت.`);
+        continue;
+      }
+      try {
+        const ext = file.name.split(".").pop()?.toLowerCase() || (isVideo ? "mp4" : "jpg");
+        const key = `${workspaceId}/uploads/${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("nour-media")
+          .upload(key, file, { contentType: file.type, upsert: false });
+        if (upErr) throw upErr;
+        const { data } = await supabase.storage
+          .from("nour-media")
+          .createSignedUrl(key, 60 * 60 * 24 * 365 * 5);
+        if (!data?.signedUrl) throw new Error("no-url");
+        added.push({ url: data.signedUrl, type: isVideo ? "video" : "image", alt: file.name });
+      } catch {
+        setError(`تعذّر رفع «${file.name}». أعد المحاولة.`);
+      } finally {
+        setUploading((n) => Math.max(0, n - 1));
+      }
+    }
+    setUploading(0);
+    if (added.length) {
+      const existing = new Set(attachments.map((a) => a.url));
+      onAttachmentsChange(
+        [...attachments, ...added.filter((a) => !existing.has(a.url))].slice(0, MAX_ATTACHMENTS),
+      );
+    }
   };
 
   const addLink = () => {
