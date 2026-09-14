@@ -1199,7 +1199,12 @@ function ChatPage() {
                 <PromptInputTools>
                   <PromptInputButton
                     type="button"
-                    onClick={() => setToolsOpen((value) => !value)}
+                    onClick={() => {
+                      setToolsOpen((value) => {
+                        if (value) setActiveTool(null);
+                        return !value;
+                      });
+                    }}
                     aria-expanded={toolsOpen}
                     aria-label="أدوات الطلب"
                     title="الوسائط وإعدادات الطلب"
