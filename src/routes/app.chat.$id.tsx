@@ -17,6 +17,7 @@ import {
   ArrowUpLeft,
   Fingerprint,
   SlidersHorizontal,
+  ChevronDown,
 } from "lucide-react";
 
 import { AppShell } from "@/components/app/AppShell";
@@ -457,6 +458,122 @@ function useTypewriter(lines: string[], pause = 1700) {
   return lines[line]?.slice(0, length) ?? "";
 }
 
+/** منتقي المحادثات داخل الشريط الثابت: تبديل · تسمية · حذف · محادثة جديدة. */
+function ThreadPicker({
+  conversations,
+  conversationId,
+  onSelect,
+  onCreate,
+  onRename,
+  onDelete,
+  creating,
+}: {
+  conversations: { id: string; title: string }[];
+  conversationId: string | undefined;
+  onSelect: (id: string) => void;
+  onCreate: () => void;
+  onRename: (id: string, title: string) => void;
+  onDelete: (id: string) => void;
+  creating: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (!boxRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  const active = conversations.find((c) => c.id === conversationId);
+
+  return (
+    <div className="chat-thread-picker" ref={boxRef}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-label="المحادثات"
+        title="محادثات هذا الموظف"
+        className="chat-thread-trigger"
+      >
+        <History className="size-3.5 shrink-0" />
+        <span>{active?.title ?? "محادثة جديدة"}</span>
+        <ChevronDown className={cn("size-3.5 shrink-0 transition-transform", open && "rotate-180")} />
+      </button>
+      {open ? (
+        <div className="chat-thread-menu" role="menu">
+          <div className="flex items-center justify-between gap-2 border-b border-border/70 px-3 py-2">
+            <p className="text-[0.68rem] font-bold text-muted-foreground">المحادثات</p>
+            <button
+              type="button"
+              onClick={onCreate}
+              disabled={creating}
+              className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[0.68rem] font-bold transition-colors hover:bg-secondary disabled:opacity-50"
+            >
+              {creating ? <Loader2 className="size-3 animate-spin" /> : <Plus className="size-3" />}
+              جديدة
+            </button>
+          </div>
+          <div className="chat-thread-menu-list">
+            {conversations.length ? (
+              conversations.map((conversation) => (
+                <div
+                  key={conversation.id}
+                  className={cn(
+                    "chat-thread-row group",
+                    conversation.id === conversationId && "is-active",
+                  )}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelect(conversation.id);
+                      setOpen(false);
+                    }}
+                    onDoubleClick={() => {
+                      const title = window.prompt("اسم المحادثة", conversation.title)?.trim();
+                      if (title) onRename(conversation.id, title);
+                    }}
+                    className="min-w-0 flex-1 truncate px-2 py-2 text-start text-[0.78rem] font-semibold"
+                    title="انقر مرتين لإعادة التسمية"
+                  >
+                    {conversation.title}
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="حذف المحادثة"
+                    title="حذف المحادثة"
+                    onClick={() => {
+                      if (window.confirm("حذف هذه المحادثة ورسائلها؟")) onDelete(conversation.id);
+                    }}
+                    className="grid size-7 shrink-0 place-items-center rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-coral/10 hover:text-coral group-hover:opacity-100 focus:opacity-100"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="px-3 py-4 text-center text-xs text-muted-foreground">
+                لا توجد محادثات بعد.
+              </p>
+            )}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function ChatPage() {
   const { id } = Route.useParams();
   const member = getMember(id)!;
@@ -531,7 +648,8 @@ function ChatPage() {
   const runSkillFn = useServerFn(runSkill);
   const employeeSkills = skillsFor(id);
   const quickSkills = featuredSkillsFor(id).slice(0, 6);
-  const employeeCopy = EMPLOYEE_COPY[id] ?? EMPLOYEE_COPY.sonny;
+  const employeeCopy: { prompts: string[]; greetings: string[] } =
+    EMPLOYEE_COPY[id] ?? EMPLOYEE_COPY["sonny"]!;
   const rotatingPlaceholder = useTypewriter(employeeCopy.prompts);
   const rotatingGreeting = useTypewriter(employeeCopy.greetings, 2400);
   const userName = profile?.full_name?.trim().split(/\s+/)[0] || "صديقي";
@@ -658,11 +776,23 @@ function ChatPage() {
       }
     >
       <div className="chat-command-layout">
-        <div className="chat-stage relative flex min-h-[calc(100dvh-4rem)] min-w-0 flex-col">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(60%_100%_at_50%_0%,color-mix(in_oklab,var(--primary)_9%,transparent),transparent)]"
-          />
+        <div
+          className="chat-stage relative flex min-h-[calc(100dvh-4rem)] min-w-0 flex-col"
+          style={
+            {
+              "--chat-accent": member.tint,
+              "--chat-accent-soft": member.tintSoft,
+            } as React.CSSProperties
+          }
+        >
+          <div className="chat-smoke" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+            <b />
+            <b />
+            <b />
+          </div>
           <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 sm:px-6">
             <SiteBadgeBar
               website={(workspace as { website?: string | null } | undefined)?.website ?? null}
@@ -675,10 +805,24 @@ function ChatPage() {
                 <span className="min-w-0">
                   <span className="block truncate text-xs font-black">{member.name}</span>
                   <span className="inline-flex items-center gap-1 text-[0.62rem] font-bold text-primary">
-                    <span className="size-1.5 rounded-full bg-primary" /> متصل
+                    <span className="chat-live-dot size-1.5 rounded-full bg-primary" /> متصل
                   </span>
                 </span>
               </div>
+              <ThreadPicker
+                conversations={conversations ?? []}
+                conversationId={conversationId}
+                onSelect={setConversationId}
+                onCreate={() =>
+                  createConversation.mutate(undefined, {
+                    onSuccess: (row) => setConversationId(row.id),
+                  })
+                }
+                onRename={(cid, title) => renameConversation.mutate({ id: cid, title })}
+                onDelete={(cid) => deleteConversation.mutate(cid)}
+                creating={createConversation.isPending}
+              />
+
               <div className="employee-command-skills">
                 <SkillPalette
                   skills={employeeSkills}
@@ -971,7 +1115,9 @@ function ChatPage() {
                 ref={inputRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder={rotatingPlaceholder || `اكتب طلبك لـ${member.name}…`}
+                placeholder={
+                  rotatingPlaceholder ? `${rotatingPlaceholder}▌` : `اكتب طلبك لـ${member.name}…`
+                }
                 dir="auto"
                 className="max-h-40 min-h-12 bg-transparent px-3 py-2.5 placeholder:text-muted-foreground/80"
               />

@@ -11966,3 +11966,373 @@ section:has(> .integration-grid-wave) {
     animation: none !important;
   }
 }
+
+/* ═════ مركز محادثة الموظف — دخان ذهبي متحرك + مربع إدخال شفاف ═════
+   يعتمد على متغيّرين يضبطهما كل موظف: --chat-accent و --chat-accent-soft. */
+.chat-stage {
+  --chat-accent: var(--gold);
+  --chat-accent-soft: color-mix(in oklab, var(--gold) 16%, transparent);
+  position: relative;
+  isolation: isolate;
+  background: var(--background);
+}
+
+/* الدخان الذهبي: يروح وييجي ويخلّف آثار مروره. */
+.chat-smoke {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: paint;
+}
+.chat-smoke i {
+  position: absolute;
+  display: block;
+  width: min(46rem, 78vw);
+  aspect-ratio: 1.35;
+  border-radius: 48% 52% 60% 40%;
+  filter: blur(64px);
+  opacity: 0.32;
+  will-change: transform, opacity;
+}
+.chat-smoke i:nth-child(1) {
+  inset: -14% auto auto -12%;
+  background: color-mix(in oklab, var(--chat-accent) 46%, var(--gold) 54%);
+  animation: chat-smoke-a 26s ease-in-out infinite alternate;
+}
+.chat-smoke i:nth-child(2) {
+  inset: 8% -18% auto auto;
+  background: color-mix(in oklab, var(--gold) 62%, var(--chat-accent) 38%);
+  animation: chat-smoke-b 33s ease-in-out infinite alternate;
+}
+.chat-smoke i:nth-child(3) {
+  inset: auto 14% -22% auto;
+  background: color-mix(in oklab, var(--chat-accent) 40%, var(--amber, var(--gold)) 60%);
+  animation: chat-smoke-c 39s ease-in-out infinite alternate;
+}
+/* آثار المرور: خطوط ضوئية باهتة تبقى بعد تحرّك الدخان. */
+.chat-smoke b {
+  position: absolute;
+  inset-inline: -10%;
+  height: 22rem;
+  display: block;
+  border-radius: 50%;
+  background: radial-gradient(
+    60% 100% at 50% 50%,
+    color-mix(in oklab, var(--chat-accent) 13%, transparent),
+    transparent 72%
+  );
+  filter: blur(38px);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.chat-smoke b:nth-of-type(1) {
+  top: 6%;
+  animation: chat-smoke-trail 18s ease-in-out infinite;
+}
+.chat-smoke b:nth-of-type(2) {
+  top: 42%;
+  animation: chat-smoke-trail 23s ease-in-out infinite 4s;
+}
+.chat-smoke b:nth-of-type(3) {
+  bottom: 4%;
+  animation: chat-smoke-trail 29s ease-in-out infinite 9s;
+}
+@keyframes chat-smoke-a {
+  0% {
+    opacity: 0.1;
+    transform: translate3d(-7%, -4%, 0) rotate(-4deg) scale(0.86);
+  }
+  40% {
+    opacity: 0.4;
+    transform: translate3d(9%, 6%, 0) rotate(4deg) scale(1.1);
+  }
+  75% {
+    opacity: 0.16;
+    transform: translate3d(20%, 12%, 0) rotate(9deg) scale(1.18);
+  }
+  100% {
+    opacity: 0.34;
+    transform: translate3d(11%, 1%, 0) rotate(2deg) scale(0.96);
+  }
+}
+@keyframes chat-smoke-b {
+  0% {
+    opacity: 0.08;
+    transform: translate3d(10%, -6%, 0) rotate(4deg) scale(0.9);
+  }
+  45% {
+    opacity: 0.3;
+    transform: translate3d(-6%, 9%, 0) rotate(-5deg) scale(1.14);
+  }
+  80% {
+    opacity: 0.12;
+    transform: translate3d(-19%, 15%, 0) rotate(-11deg) scale(0.95);
+  }
+  100% {
+    opacity: 0.28;
+    transform: translate3d(-8%, 3%, 0) rotate(3deg) scale(1.06);
+  }
+}
+@keyframes chat-smoke-c {
+  0% {
+    opacity: 0.07;
+    transform: translate3d(7%, 13%, 0) rotate(-3deg) scale(0.9);
+  }
+  38% {
+    opacity: 0.3;
+    transform: translate3d(-5%, -5%, 0) rotate(5deg) scale(1.12);
+  }
+  74% {
+    opacity: 0.12;
+    transform: translate3d(-15%, -17%, 0) rotate(8deg) scale(1.2);
+  }
+  100% {
+    opacity: 0.26;
+    transform: translate3d(2%, -6%, 0) rotate(-2deg) scale(0.98);
+  }
+}
+@keyframes chat-smoke-trail {
+  0% {
+    opacity: 0;
+    transform: translate3d(-24%, 0, 0) scaleY(0.7);
+  }
+  18% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.55;
+    transform: translate3d(6%, 0, 0) scaleY(1.05);
+  }
+  82% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(26%, 0, 0) scaleY(0.8);
+  }
+}
+
+/* الشريط الثابت: صف واحد نظيف — الهوية · المحادثة الحالية · القدرات · التطبيقات. */
+.employee-command-bar {
+  position: sticky;
+  z-index: 26;
+  top: 4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 3.9rem;
+  margin-inline: -0.4rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid color-mix(in oklab, var(--chat-accent) 18%, var(--border));
+  border-top-color: transparent;
+  border-radius: 0 0 1.1rem 1.1rem;
+  background: color-mix(in oklab, var(--background) 62%, transparent);
+  box-shadow:
+    0 1px 0 0 color-mix(in oklab, var(--chat-accent) 22%, transparent) inset,
+    0 22px 44px -40px var(--foreground);
+  backdrop-filter: blur(26px) saturate(1.2);
+}
+.employee-command-bar::after {
+  content: "";
+  position: absolute;
+  inset-inline: 12%;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--chat-accent) 55%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+.employee-command-identity {
+  border-inline-end-color: color-mix(in oklab, var(--chat-accent) 20%, var(--border));
+}
+.employee-command-identity .chat-live-dot {
+  background: var(--chat-accent);
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--chat-accent) 60%, transparent);
+  animation: chat-live-pulse 2.4s ease-out infinite;
+}
+@keyframes chat-live-pulse {
+  70% {
+    box-shadow: 0 0 0 0.32rem color-mix(in oklab, var(--chat-accent) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--chat-accent) 0%, transparent);
+  }
+}
+
+/* منتقي المحادثات داخل الشريط نفسه. */
+.chat-thread-picker {
+  position: relative;
+  flex: 0 0 auto;
+}
+.chat-thread-trigger {
+  display: inline-flex;
+  max-width: 13rem;
+  min-height: 2.3rem;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  padding-inline: 0.7rem;
+  background: color-mix(in oklab, var(--card) 55%, transparent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  transition: 180ms ease;
+}
+.chat-thread-trigger:hover,
+.chat-thread-trigger[aria-expanded="true"] {
+  border-color: color-mix(in oklab, var(--chat-accent) 48%, var(--border));
+  color: color-mix(in oklab, var(--chat-accent) 72%, var(--foreground));
+}
+.chat-thread-trigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-thread-menu {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 0.5rem);
+  inset-inline-start: 0;
+  width: min(20rem, 82vw);
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--chat-accent) 16%, var(--border));
+  border-radius: 0.9rem;
+  background: color-mix(in oklab, var(--card) 92%, transparent);
+  box-shadow: 0 28px 60px -34px var(--foreground);
+  backdrop-filter: blur(22px);
+  animation: chat-menu-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes chat-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.35rem);
+  }
+}
+.chat-thread-menu-list {
+  max-height: 46dvh;
+  overflow-y: auto;
+  padding: 0.4rem;
+}
+.chat-thread-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
+  padding: 0.15rem 0.3rem;
+}
+.chat-thread-row:hover {
+  background: color-mix(in oklab, var(--chat-accent) 8%, transparent);
+}
+.chat-thread-row.is-active {
+  border-color: color-mix(in oklab, var(--chat-accent) 40%, transparent);
+  background: color-mix(in oklab, var(--chat-accent) 12%, transparent);
+}
+
+/* لوحة الترحيب قبل الإرسال. */
+.chat-welcome-avatar {
+  border-color: color-mix(in oklab, var(--background) 88%, var(--chat-accent));
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--chat-accent) 28%, transparent),
+    0 18px 40px -24px var(--foreground);
+  animation: chat-welcome-float 7s ease-in-out infinite alternate;
+}
+.chat-welcome-avatar.is-employee {
+  animation-delay: -3.2s;
+}
+@keyframes chat-welcome-float {
+  to {
+    transform: translateY(-0.4rem) rotate(0deg);
+  }
+}
+.chat-welcome-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: center;
+  border: 1px solid color-mix(in oklab, var(--chat-accent) 26%, var(--border));
+  border-radius: 999px;
+  padding: 0.28rem 0.75rem;
+  background: color-mix(in oklab, var(--chat-accent) 9%, transparent);
+  color: color-mix(in oklab, var(--chat-accent) 70%, var(--foreground));
+}
+.chat-welcome h2 {
+  margin-top: 0.8rem;
+}
+.typewriter-caret {
+  background: var(--chat-accent, var(--primary));
+}
+
+/* مربع الإدخال: شفاف من كل الاتجاهات، والكلام حوله يبقى مقروءاً. */
+.chat-composer-dock {
+  background: transparent;
+}
+.chat-composer {
+  position: relative;
+  border-color: color-mix(in oklab, var(--chat-accent) 26%, var(--border));
+  background: color-mix(in oklab, var(--background) 26%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in oklab, var(--background) 30%, transparent) inset,
+    0 26px 60px -46px var(--foreground);
+  backdrop-filter: blur(9px) saturate(1.1);
+  transition: 220ms ease;
+}
+.chat-composer::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -0.7rem;
+  border-radius: 1.6rem;
+  background: radial-gradient(
+    70% 120% at 50% 100%,
+    color-mix(in oklab, var(--chat-accent) 12%, transparent),
+    transparent 70%
+  );
+  opacity: 0.85;
+  pointer-events: none;
+  animation: chat-composer-halo 9s ease-in-out infinite alternate;
+}
+@keyframes chat-composer-halo {
+  to {
+    opacity: 0.35;
+    transform: translateY(-0.25rem) scale(1.03);
+  }
+}
+.chat-composer:focus-within {
+  border-color: color-mix(in oklab, var(--chat-accent) 55%, var(--border));
+  background: color-mix(in oklab, var(--background) 42%, transparent);
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--chat-accent) 12%, transparent),
+    0 30px 70px -46px var(--foreground);
+}
+.chat-composer textarea::placeholder {
+  color: color-mix(in oklab, var(--muted-foreground) 88%, var(--chat-accent));
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .chat-thread-trigger {
+    max-width: 7.5rem;
+  }
+  .chat-smoke i {
+    filter: blur(48px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-smoke i,
+  .chat-smoke b,
+  .chat-welcome-avatar,
+  .chat-composer::before,
+  .employee-command-identity .chat-live-dot {
+    animation: none !important;
+  }
+  .chat-smoke b {
+    opacity: 0.25;
+  }
+}
