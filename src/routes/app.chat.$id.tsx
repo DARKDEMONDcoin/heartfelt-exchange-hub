@@ -30,6 +30,8 @@ import {
   Plane,
   CalendarClock,
   CheckCircle2,
+  Sparkles,
+  ScrollText,
 } from "lucide-react";
 
 import { AppShell } from "@/components/app/AppShell";
@@ -385,7 +387,9 @@ type WorkTool = {
     | "/app/calendar"
     | "/app/automations"
     | "/app/queue"
-    | "/app/approvals";
+    | "/app/approvals"
+    | "/app/proposals"
+    | "/app/decisions";
   icon: typeof ListChecks;
   sonnyOnly?: boolean;
 };
@@ -435,6 +439,20 @@ const WORK_TOOLS: WorkTool[] = [
     description: "راجع واعتمد النتائج",
     to: "/app/approvals",
     icon: CheckCircle2,
+  },
+  {
+    id: "proposals",
+    title: "مبادرات الفريق",
+    description: "ما يقترحه الموظف من نفسه",
+    to: "/app/proposals",
+    icon: Sparkles,
+  },
+  {
+    id: "decisions",
+    title: "سجل القرارات",
+    description: "كل ما اتفقتم عليه ملزم",
+    to: "/app/decisions",
+    icon: ScrollText,
   },
 ];
 

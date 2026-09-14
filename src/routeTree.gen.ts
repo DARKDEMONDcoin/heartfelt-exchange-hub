@@ -37,8 +37,10 @@ import { Route as AppAutomationsRouteImport } from './routes/app.automations'
 import { Route as AppAutopilotRouteImport } from './routes/app.autopilot'
 import { Route as AppBrainRouteImport } from './routes/app.brain'
 import { Route as AppCalendarRouteImport } from './routes/app.calendar'
+import { Route as AppDecisionsRouteImport } from './routes/app.decisions'
 import { Route as AppDiscoveryRouteImport } from './routes/app.discovery'
 import { Route as AppIntegrationsRouteImport } from './routes/app.integrations'
+import { Route as AppProposalsRouteImport } from './routes/app.proposals'
 import { Route as AppQueueRouteImport } from './routes/app.queue'
 import { Route as AppRankingsRouteImport } from './routes/app.rankings'
 import { Route as AppReportsRouteImport } from './routes/app.reports'
@@ -54,6 +56,7 @@ import { Route as ApiPublicMorningBriefingRouteImport } from './routes/api/publi
 import { Route as ApiPublicNourAutomationsRouteImport } from './routes/api/public/nour-automations'
 import { Route as ApiPublicNourWeeklyRouteImport } from './routes/api/public/nour-weekly'
 import { Route as ApiPublicPipedreamWebhookRouteImport } from './routes/api/public/pipedream-webhook'
+import { Route as ApiPublicProactiveRouteImport } from './routes/api/public/proactive'
 import { Route as ApiPublicPxRouteImport } from './routes/api/public/px'
 import { Route as ApiPublicSocialAutopilotRouteImport } from './routes/api/public/social-autopilot'
 import { Route as ApiPublicSocialQueueRouteImport } from './routes/api/public/social-queue'
@@ -203,6 +206,11 @@ const AppCalendarRoute = AppCalendarRouteImport.update({
   path: '/calendar',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDecisionsRoute = AppDecisionsRouteImport.update({
+  id: '/decisions',
+  path: '/decisions',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDiscoveryRoute = AppDiscoveryRouteImport.update({
   id: '/discovery',
   path: '/discovery',
@@ -211,6 +219,11 @@ const AppDiscoveryRoute = AppDiscoveryRouteImport.update({
 const AppIntegrationsRoute = AppIntegrationsRouteImport.update({
   id: '/integrations',
   path: '/integrations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProposalsRoute = AppProposalsRouteImport.update({
+  id: '/proposals',
+  path: '/proposals',
   getParentRoute: () => AppRoute,
 } as any)
 const AppQueueRoute = AppQueueRouteImport.update({
@@ -291,6 +304,11 @@ const ApiPublicPipedreamWebhookRoute =
     path: '/api/public/pipedream-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicProactiveRoute = ApiPublicProactiveRouteImport.update({
+  id: '/api/public/proactive',
+  path: '/api/public/proactive',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPxRoute = ApiPublicPxRouteImport.update({
   id: '/api/public/px',
   path: '/api/public/px',
@@ -362,8 +380,10 @@ export interface FileRoutesByFullPath {
   '/app/autopilot': typeof AppAutopilotRoute
   '/app/brain': typeof AppBrainRoute
   '/app/calendar': typeof AppCalendarRoute
+  '/app/decisions': typeof AppDecisionsRoute
   '/app/discovery': typeof AppDiscoveryRoute
   '/app/integrations': typeof AppIntegrationsRoute
+  '/app/proposals': typeof AppProposalsRoute
   '/app/queue': typeof AppQueueRoute
   '/app/rankings': typeof AppRankingsRoute
   '/app/reports': typeof AppReportsRoute
@@ -380,6 +400,7 @@ export interface FileRoutesByFullPath {
   '/api/public/nour-automations': typeof ApiPublicNourAutomationsRoute
   '/api/public/nour-weekly': typeof ApiPublicNourWeeklyRoute
   '/api/public/pipedream-webhook': typeof ApiPublicPipedreamWebhookRoute
+  '/api/public/proactive': typeof ApiPublicProactiveRoute
   '/api/public/px': typeof ApiPublicPxRoute
   '/api/public/social-autopilot': typeof ApiPublicSocialAutopilotRoute
   '/api/public/social-queue': typeof ApiPublicSocialQueueRoute
@@ -416,8 +437,10 @@ export interface FileRoutesByTo {
   '/app/autopilot': typeof AppAutopilotRoute
   '/app/brain': typeof AppBrainRoute
   '/app/calendar': typeof AppCalendarRoute
+  '/app/decisions': typeof AppDecisionsRoute
   '/app/discovery': typeof AppDiscoveryRoute
   '/app/integrations': typeof AppIntegrationsRoute
+  '/app/proposals': typeof AppProposalsRoute
   '/app/queue': typeof AppQueueRoute
   '/app/rankings': typeof AppRankingsRoute
   '/app/reports': typeof AppReportsRoute
@@ -434,6 +457,7 @@ export interface FileRoutesByTo {
   '/api/public/nour-automations': typeof ApiPublicNourAutomationsRoute
   '/api/public/nour-weekly': typeof ApiPublicNourWeeklyRoute
   '/api/public/pipedream-webhook': typeof ApiPublicPipedreamWebhookRoute
+  '/api/public/proactive': typeof ApiPublicProactiveRoute
   '/api/public/px': typeof ApiPublicPxRoute
   '/api/public/social-autopilot': typeof ApiPublicSocialAutopilotRoute
   '/api/public/social-queue': typeof ApiPublicSocialQueueRoute
@@ -472,8 +496,10 @@ export interface FileRoutesById {
   '/app/autopilot': typeof AppAutopilotRoute
   '/app/brain': typeof AppBrainRoute
   '/app/calendar': typeof AppCalendarRoute
+  '/app/decisions': typeof AppDecisionsRoute
   '/app/discovery': typeof AppDiscoveryRoute
   '/app/integrations': typeof AppIntegrationsRoute
+  '/app/proposals': typeof AppProposalsRoute
   '/app/queue': typeof AppQueueRoute
   '/app/rankings': typeof AppRankingsRoute
   '/app/reports': typeof AppReportsRoute
@@ -490,6 +516,7 @@ export interface FileRoutesById {
   '/api/public/nour-automations': typeof ApiPublicNourAutomationsRoute
   '/api/public/nour-weekly': typeof ApiPublicNourWeeklyRoute
   '/api/public/pipedream-webhook': typeof ApiPublicPipedreamWebhookRoute
+  '/api/public/proactive': typeof ApiPublicProactiveRoute
   '/api/public/px': typeof ApiPublicPxRoute
   '/api/public/social-autopilot': typeof ApiPublicSocialAutopilotRoute
   '/api/public/social-queue': typeof ApiPublicSocialQueueRoute
@@ -529,8 +556,10 @@ export interface FileRouteTypes {
     | '/app/autopilot'
     | '/app/brain'
     | '/app/calendar'
+    | '/app/decisions'
     | '/app/discovery'
     | '/app/integrations'
+    | '/app/proposals'
     | '/app/queue'
     | '/app/rankings'
     | '/app/reports'
@@ -547,6 +576,7 @@ export interface FileRouteTypes {
     | '/api/public/nour-automations'
     | '/api/public/nour-weekly'
     | '/api/public/pipedream-webhook'
+    | '/api/public/proactive'
     | '/api/public/px'
     | '/api/public/social-autopilot'
     | '/api/public/social-queue'
@@ -583,8 +613,10 @@ export interface FileRouteTypes {
     | '/app/autopilot'
     | '/app/brain'
     | '/app/calendar'
+    | '/app/decisions'
     | '/app/discovery'
     | '/app/integrations'
+    | '/app/proposals'
     | '/app/queue'
     | '/app/rankings'
     | '/app/reports'
@@ -601,6 +633,7 @@ export interface FileRouteTypes {
     | '/api/public/nour-automations'
     | '/api/public/nour-weekly'
     | '/api/public/pipedream-webhook'
+    | '/api/public/proactive'
     | '/api/public/px'
     | '/api/public/social-autopilot'
     | '/api/public/social-queue'
@@ -638,8 +671,10 @@ export interface FileRouteTypes {
     | '/app/autopilot'
     | '/app/brain'
     | '/app/calendar'
+    | '/app/decisions'
     | '/app/discovery'
     | '/app/integrations'
+    | '/app/proposals'
     | '/app/queue'
     | '/app/rankings'
     | '/app/reports'
@@ -656,6 +691,7 @@ export interface FileRouteTypes {
     | '/api/public/nour-automations'
     | '/api/public/nour-weekly'
     | '/api/public/pipedream-webhook'
+    | '/api/public/proactive'
     | '/api/public/px'
     | '/api/public/social-autopilot'
     | '/api/public/social-queue'
@@ -699,6 +735,7 @@ export interface RootRouteChildren {
   ApiPublicNourAutomationsRoute: typeof ApiPublicNourAutomationsRoute
   ApiPublicNourWeeklyRoute: typeof ApiPublicNourWeeklyRoute
   ApiPublicPipedreamWebhookRoute: typeof ApiPublicPipedreamWebhookRoute
+  ApiPublicProactiveRoute: typeof ApiPublicProactiveRoute
   ApiPublicPxRoute: typeof ApiPublicPxRoute
   ApiPublicSocialAutopilotRoute: typeof ApiPublicSocialAutopilotRoute
   ApiPublicSocialQueueRoute: typeof ApiPublicSocialQueueRoute
@@ -905,6 +942,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalendarRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/decisions': {
+      id: '/app/decisions'
+      path: '/decisions'
+      fullPath: '/app/decisions'
+      preLoaderRoute: typeof AppDecisionsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/discovery': {
       id: '/app/discovery'
       path: '/discovery'
@@ -917,6 +961,13 @@ declare module '@tanstack/react-router' {
       path: '/integrations'
       fullPath: '/app/integrations'
       preLoaderRoute: typeof AppIntegrationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/proposals': {
+      id: '/app/proposals'
+      path: '/proposals'
+      fullPath: '/app/proposals'
+      preLoaderRoute: typeof AppProposalsRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/queue': {
@@ -1024,6 +1075,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPipedreamWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/proactive': {
+      id: '/api/public/proactive'
+      path: '/api/public/proactive'
+      fullPath: '/api/public/proactive'
+      preLoaderRoute: typeof ApiPublicProactiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/px': {
       id: '/api/public/px'
       path: '/api/public/px'
@@ -1089,8 +1147,10 @@ interface AppRouteChildren {
   AppAutopilotRoute: typeof AppAutopilotRoute
   AppBrainRoute: typeof AppBrainRoute
   AppCalendarRoute: typeof AppCalendarRoute
+  AppDecisionsRoute: typeof AppDecisionsRoute
   AppDiscoveryRoute: typeof AppDiscoveryRoute
   AppIntegrationsRoute: typeof AppIntegrationsRoute
+  AppProposalsRoute: typeof AppProposalsRoute
   AppQueueRoute: typeof AppQueueRoute
   AppRankingsRoute: typeof AppRankingsRoute
   AppReportsRoute: typeof AppReportsRoute
@@ -1107,8 +1167,10 @@ const AppRouteChildren: AppRouteChildren = {
   AppAutopilotRoute: AppAutopilotRoute,
   AppBrainRoute: AppBrainRoute,
   AppCalendarRoute: AppCalendarRoute,
+  AppDecisionsRoute: AppDecisionsRoute,
   AppDiscoveryRoute: AppDiscoveryRoute,
   AppIntegrationsRoute: AppIntegrationsRoute,
+  AppProposalsRoute: AppProposalsRoute,
   AppQueueRoute: AppQueueRoute,
   AppRankingsRoute: AppRankingsRoute,
   AppReportsRoute: AppReportsRoute,
@@ -1154,6 +1216,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicNourAutomationsRoute: ApiPublicNourAutomationsRoute,
   ApiPublicNourWeeklyRoute: ApiPublicNourWeeklyRoute,
   ApiPublicPipedreamWebhookRoute: ApiPublicPipedreamWebhookRoute,
+  ApiPublicProactiveRoute: ApiPublicProactiveRoute,
   ApiPublicPxRoute: ApiPublicPxRoute,
   ApiPublicSocialAutopilotRoute: ApiPublicSocialAutopilotRoute,
   ApiPublicSocialQueueRoute: ApiPublicSocialQueueRoute,

@@ -429,6 +429,73 @@ export type Database = {
           },
         ]
       }
+      decisions: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          decision: string
+          employee_id: string
+          id: string
+          kind: string
+          rationale: string | null
+          status: string
+          superseded_by: string | null
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          decision: string
+          employee_id: string
+          id?: string
+          kind?: string
+          rationale?: string | null
+          status?: string
+          superseded_by?: string | null
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          decision?: string
+          employee_id?: string
+          id?: string
+          kind?: string
+          rationale?: string | null
+          status?: string
+          superseded_by?: string | null
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decisions_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decisions_superseded_by_fkey"
+            columns: ["superseded_by"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decisions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_credentials: {
         Row: {
           config: Json
@@ -747,6 +814,72 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      proposals: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          impact: string | null
+          priority: number
+          reason: string
+          signal: string
+          skill_id: string | null
+          status: string
+          task_id: string | null
+          title: string
+          updated_at: string
+          values: Json
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          impact?: string | null
+          priority?: number
+          reason: string
+          signal: string
+          skill_id?: string | null
+          status?: string
+          task_id?: string | null
+          title: string
+          updated_at?: string
+          values?: Json
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          impact?: string | null
+          priority?: number
+          reason?: string
+          signal?: string
+          skill_id?: string | null
+          status?: string
+          task_id?: string | null
+          title?: string
+          updated_at?: string
+          values?: Json
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposals_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rank_snapshots: {
         Row: {
