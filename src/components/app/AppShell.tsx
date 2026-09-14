@@ -240,7 +240,12 @@ export function AppShell({
         <i />
         <i />
       </div>
-      <aside className={cn("sticky top-0 hidden h-screen w-64 shrink-0 self-start overflow-y-auto border-e border-border bg-card lg:block", embedded && "lg:hidden")}>
+      <aside
+        className={cn(
+          "sticky top-0 hidden h-screen w-64 shrink-0 self-start overflow-y-auto border-e border-border bg-card lg:block",
+          embedded && "lg:hidden",
+        )}
+      >
         <SidebarBody />
       </aside>
 
@@ -258,7 +263,12 @@ export function AppShell({
       ) : null}
 
       <div className="relative z-10 flex min-w-0 flex-1 flex-col">
-        <header className={cn("app-topbar sticky top-0 z-30 px-2 pt-2 sm:px-4 sm:pt-3", embedded && "hidden")}>
+        <header
+          className={cn(
+            "app-topbar sticky top-0 z-30 px-2 pt-2 sm:px-4 sm:pt-3",
+            embedded && "hidden",
+          )}
+        >
           <div className="app-topbar-inner flex min-h-14 items-center gap-2 px-2 py-1.5 sm:gap-2.5 sm:px-3">
             <button
               className="grid size-10 shrink-0 place-items-center rounded-xl border border-border lg:hidden"
