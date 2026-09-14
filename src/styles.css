@@ -12668,7 +12668,9 @@ section:has(> .integration-grid-wave) {
 }
 .employee-command-identity > span:first-child {
   border-radius: 999px;
-  box-shadow: 0 0 0 2px var(--background), 0 0 0 3px color-mix(in oklab, var(--chat-accent) 22%, var(--border));
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 3px color-mix(in oklab, var(--chat-accent) 22%, var(--border));
 }
 .employee-command-skills {
   grid-column: 2;

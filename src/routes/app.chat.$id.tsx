@@ -1254,12 +1254,7 @@ function ChatPage() {
             className="chat-thread-backdrop"
           />
         ) : null}
-        <aside
-          className={cn(
-            "chat-thread-panel",
-            showSettings ? "is-open" : "",
-          )}
-        >
+        <aside className={cn("chat-thread-panel", showSettings ? "is-open" : "")}>
           <div className="chat-side-employee">
             <span className="relative block size-14 shrink-0 overflow-hidden rounded-xl">
               <Portrait memberId={member.id} name={member.name} className="size-full" />
