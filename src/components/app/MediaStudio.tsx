@@ -271,6 +271,50 @@ export function MediaStudio({
 
       {open ? (
         <div className="mt-3 space-y-3 rounded-2xl border border-border bg-secondary/40 p-3">
+          <div className="rounded-xl border border-border bg-background/60 p-2.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <Upload className="size-4 text-muted-foreground" />
+              <span className="text-[0.7rem] font-bold">من جهازك أو المعرض</span>
+              <span className="text-[0.65rem] text-muted-foreground">
+                {attachments.length}/{MAX_ATTACHMENTS}
+              </span>
+              <button
+                type="button"
+                disabled={
+                  disabled ||
+                  !workspaceId ||
+                  uploading > 0 ||
+                  attachments.length >= MAX_ATTACHMENTS
+                }
+                onClick={() => fileInput.current?.click()}
+                className="ms-auto inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-[0.68rem] font-bold text-background disabled:opacity-40"
+              >
+                {uploading > 0 ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <ImagePlus className="size-3" />
+                )}
+                {uploading > 0 ? `جاري الرفع… ${uploading}` : "اختر صوراً وفيديوهات"}
+              </button>
+            </div>
+            <p className="mt-1.5 text-[0.68rem] text-muted-foreground">
+              حتى ١٠ ملفات مع بعض (صور وفيديوهات)، كل ملف حتى ٥٠ ميجابايت — والموظف يقرأ محتواها
+              ويحلّلها إذا سألته عنها.
+            </p>
+            <input
+              ref={fileInput}
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              className="hidden"
+              onChange={(event) => {
+                const files = Array.from(event.target.files ?? []);
+                event.target.value = "";
+                if (files.length) void uploadFiles(files);
+              }}
+            />
+          </div>
+
           {imageMode === "manual" ? (
             <label className="block">
               <span className="text-[0.7rem] font-bold text-muted-foreground">
