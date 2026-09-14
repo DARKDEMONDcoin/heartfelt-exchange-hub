@@ -12639,3 +12639,281 @@ section:has(> .integration-grid-wave) {
     padding: 0.6rem;
   }
 }
+
+/* محادثة الموظف — اتجاه زجاجي هادئ وخفيف. */
+.employee-command-bar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.55rem;
+  min-height: 3.65rem;
+  margin-inline: 0;
+  padding: 0.45rem 0.55rem;
+  overflow: visible;
+  border-color: color-mix(in oklab, var(--border) 68%, transparent);
+  border-top: 0;
+  border-radius: 0 0 0.85rem 0.85rem;
+  background: color-mix(in oklab, var(--background) 78%, transparent);
+  box-shadow: 0 12px 28px -30px var(--foreground);
+  backdrop-filter: blur(24px) saturate(1.12);
+}
+.employee-command-bar::after {
+  display: none;
+}
+.employee-command-identity {
+  grid-column: 1;
+  gap: 0.5rem;
+  min-width: 7.4rem;
+  padding-inline-end: 0.65rem;
+  border-inline-end: 1px solid color-mix(in oklab, var(--border) 72%, transparent);
+}
+.employee-command-identity > span:first-child {
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 3px color-mix(in oklab, var(--chat-accent) 22%, var(--border));
+}
+.employee-command-skills {
+  grid-column: 2;
+  min-width: 0;
+  overflow: hidden;
+}
+.employee-command-skills .employee-command-scroll {
+  padding-block: 0.1rem;
+}
+.employee-command-link {
+  min-height: 2.15rem;
+  border-color: transparent;
+  border-radius: 999px;
+  padding-inline: 0.62rem;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.68rem;
+}
+.employee-command-link:hover {
+  border-color: color-mix(in oklab, var(--chat-accent) 18%, var(--border));
+  background: color-mix(in oklab, var(--chat-accent) 7%, transparent);
+  transform: none;
+}
+.employee-command-apps {
+  display: none;
+}
+.employee-command-history {
+  grid-column: 3;
+  grid-row: 1;
+  width: 2.4rem;
+  min-height: 2.4rem;
+  justify-content: center;
+  border-color: color-mix(in oklab, var(--border) 72%, transparent);
+  border-radius: 0.75rem;
+  padding: 0;
+  background: color-mix(in oklab, var(--background) 56%, transparent);
+}
+.employee-command-history span {
+  display: none;
+}
+
+.chat-thread-backdrop {
+  background: color-mix(in oklab, var(--foreground) 14%, transparent);
+  backdrop-filter: blur(5px);
+}
+.chat-thread-panel {
+  inset-block: 4rem 0;
+  width: min(23rem, 90vw);
+  padding: 0 1rem 1.5rem;
+  border-inline-start: 1px solid color-mix(in oklab, var(--border) 72%, transparent);
+  background: color-mix(in oklab, var(--background) 86%, transparent);
+  box-shadow: 0 26px 70px -32px var(--foreground);
+  backdrop-filter: blur(30px) saturate(1.08);
+}
+.chat-side-employee {
+  top: 0;
+  margin: 0 -1rem;
+  padding: 1rem;
+  border-bottom-color: color-mix(in oklab, var(--border) 72%, transparent);
+  background: color-mix(in oklab, var(--background) 80%, transparent);
+}
+.chat-side-employee > span:first-child {
+  border-radius: 999px;
+}
+.chat-side-section {
+  margin: 0;
+  padding: 1.15rem 0;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 68%, transparent);
+  border-radius: 0;
+  background: transparent;
+}
+.chat-side-label {
+  font-size: 0.64rem;
+  letter-spacing: 0;
+}
+.chat-side-accounts {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  padding-bottom: 0.15rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.chat-side-accounts::-webkit-scrollbar {
+  display: none;
+}
+.chat-side-accounts > span {
+  min-width: max-content;
+  border-color: color-mix(in oklab, var(--border) 72%, transparent) !important;
+  border-radius: 999px !important;
+  background: color-mix(in oklab, var(--background) 50%, transparent);
+}
+.chat-side-thread {
+  min-height: 2.7rem;
+  border-radius: 0.65rem;
+  padding-inline: 0.35rem;
+}
+.chat-side-thread:hover,
+.chat-side-thread.border-primary\/40 {
+  background: color-mix(in oklab, var(--chat-accent) 7%, transparent);
+}
+.chat-side-links {
+  gap: 0;
+  padding-top: 0.5rem;
+}
+.chat-side-links > a {
+  min-height: 3.35rem;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 62%, transparent);
+  border-radius: 0;
+  background: transparent;
+}
+.chat-side-links > a:hover {
+  border-bottom-color: color-mix(in oklab, var(--chat-accent) 24%, var(--border));
+  background: color-mix(in oklab, var(--chat-accent) 5%, transparent);
+}
+.chat-side-section .mt-5 {
+  margin-top: 0;
+}
+.chat-side-section ul > li {
+  border-inline: 0;
+  border-radius: 0;
+}
+
+.chat-composer-dock {
+  padding-bottom: max(0.7rem, env(safe-area-inset-bottom));
+}
+.chat-composer {
+  border-color: color-mix(in oklab, var(--border) 76%, transparent);
+  border-radius: 1.15rem;
+  background: color-mix(in oklab, var(--background) 34%, transparent);
+  box-shadow: 0 18px 48px -38px var(--foreground);
+  backdrop-filter: blur(14px) saturate(1.08);
+}
+.chat-composer::before {
+  display: none;
+}
+.chat-tool-launcher {
+  position: absolute;
+  z-index: 36;
+  inset-inline-end: 0.55rem;
+  bottom: calc(100% + 0.55rem);
+  display: flex;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  animation: chat-tools-rise 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes chat-tools-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+}
+.chat-tool-choice {
+  min-height: 2.35rem;
+  border-color: color-mix(in oklab, var(--border) 78%, transparent);
+  border-radius: 999px;
+  padding-inline: 0.85rem;
+  background: color-mix(in oklab, var(--background) 58%, transparent);
+  box-shadow: 0 10px 28px -22px var(--foreground);
+  backdrop-filter: blur(18px) saturate(1.08);
+}
+.chat-tool-choice:hover,
+.chat-tool-choice.is-active {
+  background: color-mix(in oklab, var(--background) 78%, transparent);
+}
+.chat-tool-popover {
+  bottom: calc(100% + 3.55rem);
+  border-color: color-mix(in oklab, var(--border) 72%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--background) 84%, transparent);
+  box-shadow: 0 28px 64px -38px var(--foreground);
+  backdrop-filter: blur(28px) saturate(1.08);
+}
+.chat-length-options {
+  display: flex;
+  gap: 0.35rem;
+}
+.chat-length-option {
+  min-height: 2.55rem;
+  flex: 1;
+  align-items: center;
+  border-color: transparent;
+  border-radius: 999px;
+  padding: 0.45rem;
+  background: transparent;
+  text-align: center;
+}
+.chat-length-option small,
+.chat-length-option svg {
+  display: none;
+}
+.chat-length-option:hover,
+.chat-length-option.is-active {
+  border-color: color-mix(in oklab, var(--chat-accent) 20%, var(--border));
+  background: color-mix(in oklab, var(--chat-accent) 9%, transparent);
+}
+
+@media (max-width: 640px) {
+  .employee-command-bar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.35rem;
+    margin-inline: -0.75rem;
+    padding: 0.4rem 0.55rem;
+    overflow: visible;
+  }
+  .employee-command-identity {
+    position: static;
+    min-width: 6.2rem;
+    padding-inline: 0 0.5rem;
+    background: transparent;
+    backdrop-filter: none;
+  }
+  .employee-command-identity > span:last-child {
+    display: block;
+  }
+  .employee-command-identity > span:first-child {
+    width: 2.1rem;
+    height: 2.1rem;
+  }
+  .employee-command-skills {
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .employee-command-skills .employee-command-scroll {
+    display: flex;
+    min-width: max-content;
+  }
+  .employee-command-link,
+  .employee-command-apps {
+    display: none;
+  }
+  .chat-thread-panel {
+    width: min(22rem, 88vw);
+  }
+  .chat-tool-popover {
+    inset-inline: 0;
+    bottom: calc(100% + 3.45rem);
+    max-height: 58dvh;
+  }
+  .chat-length-options {
+    display: flex;
+  }
+}

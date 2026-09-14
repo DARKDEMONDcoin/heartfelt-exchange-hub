@@ -1141,7 +1141,7 @@ function ChatPage() {
                 className="max-h-40 min-h-12 bg-transparent px-3 py-2.5 placeholder:text-muted-foreground/80"
               />
               {toolsOpen ? (
-                <div className="chat-tool-launcher animate-fade-in" aria-label="أدوات الطلب">
+                <div className="chat-tool-launcher" aria-label="أدوات الطلب">
                   <button
                     type="button"
                     onClick={() => setActiveTool((value) => (value === "media" ? null : "media"))}
@@ -1256,7 +1256,7 @@ function ChatPage() {
         ) : null}
         <aside
           className={cn(
-            "chat-thread-panel border-s border-border bg-card/95 p-4 backdrop-blur-xl",
+            "chat-thread-panel",
             showSettings ? "is-open" : "",
           )}
         >
@@ -1276,7 +1276,7 @@ function ChatPage() {
           {owned.length ? (
             <section className="chat-side-section">
               <p className="chat-side-label">حسابات {member.name}</p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="chat-side-accounts">
                 {owned.map((integration) => (
                   <span
                     key={integration.id}
