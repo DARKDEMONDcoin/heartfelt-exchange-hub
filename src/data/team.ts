@@ -287,7 +287,17 @@ export const team: TeamMember[] = [
       { k: "زمن التسليم", v: "ثوانٍ" },
       { k: "مقاسات", v: "كل المنصات" },
     ],
-    apps: ["figma", "canva", "instagram", "shopify", "drive"],
+    apps: [
+      "figma",
+      "canva",
+      "instagram",
+      "facebook",
+      "pinterest",
+      "shopify",
+      "drive",
+      "notion",
+      "slack",
+    ],
     skills: ["هوية بصرية", "تايبوغرافي عربي", "إعلانات أداء", "تحرير صور"],
     sample: [
       { label: "طلب", body: "بانر لعرض الجمعة البيضاء — خصم ٤٠٪ — بألوان الهوية الذهبية." },
