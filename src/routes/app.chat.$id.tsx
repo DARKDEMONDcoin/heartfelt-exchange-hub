@@ -639,6 +639,41 @@ function ChatView({
   /** آخر رسالة فشل إرسالها — لزر «أعد المحاولة». */
   const [pendingText, setPendingText] = useState<string | null>(null);
 
+  /** إزاحة سحب لوحة الأداة — يحرّكها المستخدم من رأسها داخل نفس المحادثة. */
+  const [toolOffset, setToolOffset] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
+  useEffect(() => {
+    setToolOffset({ x: 0, y: 0 });
+  }, [embeddedTool?.tool.id, embeddedTool?.mode]);
+  const dragHandlers = {
+    onPointerDown: (event: React.PointerEvent<HTMLElement>) => {
+      if ((event.target as HTMLElement).closest("button, a, input")) return;
+      dragRef.current = {
+        px: event.clientX,
+        py: event.clientY,
+        ox: toolOffset.x,
+        oy: toolOffset.y,
+      };
+      event.currentTarget.setPointerCapture(event.pointerId);
+    },
+    onPointerMove: (event: React.PointerEvent<HTMLElement>) => {
+      const start = dragRef.current;
+      if (!start) return;
+      setToolOffset({
+        x: start.ox + (event.clientX - start.px),
+        y: start.oy + (event.clientY - start.py),
+      });
+    },
+    onPointerUp: (event: React.PointerEvent<HTMLElement>) => {
+      dragRef.current = null;
+      if (event.currentTarget.hasPointerCapture(event.pointerId))
+        event.currentTarget.releasePointerCapture(event.pointerId);
+    },
+  };
+  const toolStyle = {
+    transform: `translate3d(${toolOffset.x}px, ${toolOffset.y}px, 0)`,
+  } satisfies React.CSSProperties;
+
   const owned = (integrations ?? []).filter((i) => i.employee_id === id);
   const filteredConversations = (conversations ?? []).filter((conversation) =>
     conversation.title
@@ -1002,7 +1037,9 @@ function ChatView({
                             isUser ? "text-background/60" : "text-muted-foreground",
                           )}
                         >
-                          <span>{timeOf(m.created_at)}</span>
+                          <span className="whitespace-nowrap tabular-nums" dir="ltr">
+                            {timeOf(m.created_at)}
+                          </span>
                           {!isUser ? (
                             <span className="ms-auto opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
                               <MessageActions
@@ -1110,8 +1147,12 @@ function ChatView({
             ) : null}
 
             {embeddedTool?.mode === "inline" ? (
-              <section className="chat-inline-tool" aria-label={embeddedTool.tool.title}>
-                <header>
+              <section
+                className="chat-inline-tool"
+                aria-label={embeddedTool.tool.title}
+                style={toolStyle}
+              >
+                <header className="chat-tool-drag" {...dragHandlers}>
                   <div>
                     <strong>{embeddedTool.tool.title}</strong>
                     <span>تعمل داخل محادثة {member.name}</span>
@@ -1274,8 +1315,12 @@ function ChatView({
         </div>
 
         {embeddedTool?.mode === "expanded" ? (
-          <section className="chat-embedded-tool" aria-label={embeddedTool.tool.title}>
-            <header>
+          <section
+            className="chat-embedded-tool"
+            aria-label={embeddedTool.tool.title}
+            style={toolStyle}
+          >
+            <header className="chat-tool-drag" {...dragHandlers}>
               <button
                 type="button"
                 onClick={() => setEmbeddedTool(null)}
