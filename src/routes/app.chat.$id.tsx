@@ -450,6 +450,10 @@ const EMPLOYEE_COPY: Record<string, { prompts: string[]; greetings: string[] }> 
   },
 };
 
+/** أزرار الشريط العلوي المناسبة لكل موظف. */
+const BAR_BRAND = new Set(["sonny", "nour", "dana"]);
+const BAR_WORK = new Set(["sonny", "eva", "sam", "nour", "adam"]);
+
 function useTypewriter(lines: string[], pause = 1700) {
   const [line, setLine] = useState(0);
   const [length, setLength] = useState(0);
@@ -647,6 +651,11 @@ function ChatPage() {
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
+    // مربع فارغ = ارتفاع ثابت، حتى لا يتحرك مع تقليب الجُمل.
+    if (!draft) {
+      el.style.height = "";
+      return;
+    }
     el.style.height = "auto";
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
   }, [draft]);
@@ -681,8 +690,9 @@ function ChatPage() {
       title={member.name}
       lead={member.role}
       padded={false}
+      compactTitle
       actions={
-        <div className="no-scrollbar flex min-w-0 max-w-[64vw] items-center gap-1.5 overflow-x-auto sm:max-w-none">
+        <div className="no-scrollbar flex min-w-0 flex-1 items-center justify-end gap-1 overflow-x-auto sm:gap-1.5">
           <SkillPalette
             skills={employeeSkills}
             quick={quickSkills}
@@ -694,39 +704,45 @@ function ChatPage() {
               skillRun.mutate({ skill, values });
             }}
           />
-          <button
-            type="button"
-            onClick={() => setBarPanel((v) => (v === "apps" ? null : "apps"))}
-            aria-expanded={barPanel === "apps"}
-            title={`تكاملات ${member.name}`}
-            className={cn("topbar-pill", barPanel === "apps" && "is-active")}
-          >
-            <PlugZap className="size-4 shrink-0" />
-            <span>التكاملات</span>
-            <small>
-              {owned.filter((i) => i.status === "connected").length}/{member.apps.length}
-            </small>
-          </button>
-          <button
-            type="button"
-            onClick={() => setBarPanel((v) => (v === "brand" ? null : "brand"))}
-            aria-expanded={barPanel === "brand"}
-            title="عقل وصوت العلامة"
-            className={cn("topbar-pill", barPanel === "brand" && "is-active")}
-          >
-            <Fingerprint className="size-4 shrink-0" />
-            <span>العلامة</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setBarPanel((v) => (v === "work" ? null : "work"))}
-            aria-expanded={barPanel === "work"}
-            title={`تشغيل ومتابعة ${member.name}`}
-            className={cn("topbar-pill", barPanel === "work" && "is-active")}
-          >
-            <Bot className="size-4 shrink-0" />
-            <span>التشغيل</span>
-          </button>
+          {member.apps.length ? (
+            <button
+              type="button"
+              onClick={() => setBarPanel((v) => (v === "apps" ? null : "apps"))}
+              aria-expanded={barPanel === "apps"}
+              title={`تكاملات ${member.name}`}
+              className={cn("topbar-pill", barPanel === "apps" && "is-active")}
+            >
+              <PlugZap className="size-4 shrink-0" />
+              <span>التكاملات</span>
+              <small>
+                {owned.filter((i) => i.status === "connected").length}/{member.apps.length}
+              </small>
+            </button>
+          ) : null}
+          {BAR_BRAND.has(member.id) ? (
+            <button
+              type="button"
+              onClick={() => setBarPanel((v) => (v === "brand" ? null : "brand"))}
+              aria-expanded={barPanel === "brand"}
+              title="عقل وصوت العلامة"
+              className={cn("topbar-pill", barPanel === "brand" && "is-active")}
+            >
+              <Fingerprint className="size-4 shrink-0" />
+              <span>العلامة</span>
+            </button>
+          ) : null}
+          {BAR_WORK.has(member.id) ? (
+            <button
+              type="button"
+              onClick={() => setBarPanel((v) => (v === "work" ? null : "work"))}
+              aria-expanded={barPanel === "work"}
+              title={`تشغيل ومتابعة ${member.name}`}
+              className={cn("topbar-pill", barPanel === "work" && "is-active")}
+            >
+              <Bot className="size-4 shrink-0" />
+              <span>التشغيل</span>
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={() => {
