@@ -12479,7 +12479,8 @@ section:has(> .integration-grid-wave) {
   display: grid;
   gap: 0.45rem;
 }
-.chat-side-links > a {
+.chat-side-links > a,
+.chat-side-links > button {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
@@ -12493,7 +12494,8 @@ section:has(> .integration-grid-wave) {
   font-weight: 800;
   transition: 180ms ease;
 }
-.chat-side-links > a:hover {
+.chat-side-links > a:hover,
+.chat-side-links > button:hover {
   border-color: color-mix(in oklab, var(--chat-accent) 42%, var(--border));
   background: color-mix(in oklab, var(--chat-accent) 8%, transparent);
 }
@@ -12802,14 +12804,16 @@ section:has(> .integration-grid-wave) {
   gap: 0;
   padding-top: 0.5rem;
 }
-.chat-side-links > a {
+.chat-side-links > a,
+.chat-side-links > button {
   min-height: 3.35rem;
   border: 0;
   border-bottom: 1px solid color-mix(in oklab, var(--border) 62%, transparent);
   border-radius: 0;
   background: transparent;
 }
-.chat-side-links > a:hover {
+.chat-side-links > a:hover,
+.chat-side-links > button:hover {
   border-bottom-color: color-mix(in oklab, var(--chat-accent) 24%, var(--border));
   background: color-mix(in oklab, var(--chat-accent) 5%, transparent);
 }
