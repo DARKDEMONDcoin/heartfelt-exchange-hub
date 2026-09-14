@@ -776,11 +776,23 @@ function ChatPage() {
       }
     >
       <div className="chat-command-layout">
-        <div className="chat-stage relative flex min-h-[calc(100dvh-4rem)] min-w-0 flex-col">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 h-56 bg-[radial-gradient(60%_100%_at_50%_0%,color-mix(in_oklab,var(--primary)_9%,transparent),transparent)]"
-          />
+        <div
+          className="chat-stage relative flex min-h-[calc(100dvh-4rem)] min-w-0 flex-col"
+          style={
+            {
+              "--chat-accent": member.tint,
+              "--chat-accent-soft": member.tintSoft,
+            } as React.CSSProperties
+          }
+        >
+          <div className="chat-smoke" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+            <b />
+            <b />
+            <b />
+          </div>
           <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 sm:px-6">
             <SiteBadgeBar
               website={(workspace as { website?: string | null } | undefined)?.website ?? null}
@@ -793,10 +805,24 @@ function ChatPage() {
                 <span className="min-w-0">
                   <span className="block truncate text-xs font-black">{member.name}</span>
                   <span className="inline-flex items-center gap-1 text-[0.62rem] font-bold text-primary">
-                    <span className="size-1.5 rounded-full bg-primary" /> متصل
+                    <span className="chat-live-dot size-1.5 rounded-full bg-primary" /> متصل
                   </span>
                 </span>
               </div>
+              <ThreadPicker
+                conversations={conversations ?? []}
+                conversationId={conversationId}
+                onSelect={setConversationId}
+                onCreate={() =>
+                  createConversation.mutate(undefined, {
+                    onSuccess: (row) => setConversationId(row.id),
+                  })
+                }
+                onRename={(cid, title) => renameConversation.mutate({ id: cid, title })}
+                onDelete={(cid) => deleteConversation.mutate(cid)}
+                creating={createConversation.isPending}
+              />
+
               <div className="employee-command-skills">
                 <SkillPalette
                   skills={employeeSkills}
