@@ -143,15 +143,31 @@ export function useConversations(workspaceId: string | undefined, employeeId: st
   return useQuery({
     queryKey: ["conversations", workspaceId, employeeId],
     enabled: !!workspaceId,
-    queryFn: () =>
-      must<Conversation[]>(
+    queryFn: async () => {
+      const conversations = await must<Conversation[]>(
         supabase
           .from("conversations")
           .select("*")
           .eq("workspace_id", workspaceId!)
           .eq("employee_id", employeeId)
           .order("updated_at", { ascending: false }),
-      ),
+      );
+      if (!conversations.length) return [];
+
+      const messageRows = await must<Array<{ conversation_id: string | null }>>(
+        supabase
+          .from("messages")
+          .select("conversation_id")
+          .eq("workspace_id", workspaceId!)
+          .eq("employee_id", employeeId)
+          .in(
+            "conversation_id",
+            conversations.map((conversation) => conversation.id),
+          ),
+      );
+      const nonEmptyIds = new Set(messageRows.map((message) => message.conversation_id).filter(Boolean));
+      return conversations.filter((conversation) => nonEmptyIds.has(conversation.id));
+    },
   });
 }
 
