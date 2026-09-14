@@ -8,7 +8,6 @@ import { listSiteAssets, syncSiteAssets, type StoredAsset } from "@/lib/brand-as
 import { ReelStudio } from "@/components/app/ReelStudio";
 import { cn } from "@/lib/utils";
 
-
 export type Attachment = { url: string; type: "image" | "video"; alt?: string };
 export type ImageMode = "auto" | "off" | "manual";
 export type Aspect = "square" | "portrait" | "landscape" | "story";
@@ -41,6 +40,8 @@ export function MediaStudio({
   aspect,
   onAspectChange,
   disabled,
+  defaultOpen = false,
+  hideTrigger = false,
 }: {
   workspaceId: string | undefined;
   attachments: Attachment[];
@@ -52,8 +53,10 @@ export function MediaStudio({
   aspect: Aspect;
   onAspectChange: (value: Aspect) => void;
   disabled?: boolean;
+  defaultOpen?: boolean;
+  hideTrigger?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [prompt, setPrompt] = useState("");
   const [count, setCount] = useState(2);
   const [literal, setLiteral] = useState(true);
@@ -100,7 +103,6 @@ export function MediaStudio({
     onError: (e: unknown) => setError(e instanceof Error ? e.message : "تعذّر سحب صور الموقع"),
   });
 
-
   const attach = (url: string, type: "image" | "video") => {
     if (attachments.some((a) => a.url === url) || attachments.length >= 8) return;
     onAttachmentsChange([...attachments, { url, type }]);
@@ -112,7 +114,8 @@ export function MediaStudio({
       setError("أدخل رابطاً يبدأ بـ http.");
       return;
     }
-    const isVideo = /\.(mp4|mov|webm|m4v)(\?|$)/i.test(url) || /youtube|youtu\.be|vimeo|tiktok/i.test(url);
+    const isVideo =
+      /\.(mp4|mov|webm|m4v)(\?|$)/i.test(url) || /youtube|youtu\.be|vimeo|tiktok/i.test(url);
     attach(url, isVideo ? "video" : "image");
     setLinkValue("");
     setError(null);
@@ -120,49 +123,58 @@ export function MediaStudio({
 
   return (
     <div className={open ? "w-full" : "min-w-0"}>
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => setOpen((v) => !v)}
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-2xl border border-border px-3 py-2 text-xs font-bold transition-colors hover:bg-secondary disabled:opacity-50",
-            open && "border-primary/50 bg-primary/10",
-          )}
-        >
-          <ImagePlus className="size-4" /> وسائط
-          {!open && imageMode !== "auto" ? (
-            <span className="text-[0.65rem] font-semibold text-muted-foreground">
-              {imageMode === "off" ? "بدون صورة" : "وصفي أنا"}
-            </span>
-          ) : null}
-          {attachments.length ? (
-            <span className="rounded-full bg-foreground px-1.5 text-[0.65rem] text-background">
-              {attachments.length}
-            </span>
-          ) : null}
-        </button>
-        <div className={cn("items-center gap-1 rounded-2xl border border-border p-0.5", open ? "flex" : "hidden")}>
-          {MODES.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              title={m.hint}
-              disabled={disabled}
-              onClick={() => {
-                onImageModeChange(m.id);
-                if (m.id === "manual") setOpen(true);
-              }}
-              className={cn(
-                "rounded-xl px-2.5 py-1.5 text-[0.7rem] font-bold transition-colors",
-                imageMode === m.id ? "bg-foreground text-background" : "text-muted-foreground hover:bg-secondary",
-              )}
-            >
-              {m.label}
-            </button>
-          ))}
+      {!hideTrigger ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => setOpen((v) => !v)}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-2xl border border-border px-3 py-2 text-xs font-bold transition-colors hover:bg-secondary disabled:opacity-50",
+              open && "border-primary/50 bg-primary/10",
+            )}
+          >
+            <ImagePlus className="size-4" /> وسائط
+            {!open && imageMode !== "auto" ? (
+              <span className="text-[0.65rem] font-semibold text-muted-foreground">
+                {imageMode === "off" ? "بدون صورة" : "وصفي أنا"}
+              </span>
+            ) : null}
+            {attachments.length ? (
+              <span className="rounded-full bg-foreground px-1.5 text-[0.65rem] text-background">
+                {attachments.length}
+              </span>
+            ) : null}
+          </button>
+          <div
+            className={cn(
+              "items-center gap-1 rounded-2xl border border-border p-0.5",
+              open ? "flex" : "hidden",
+            )}
+          >
+            {MODES.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                title={m.hint}
+                disabled={disabled}
+                onClick={() => {
+                  onImageModeChange(m.id);
+                  if (m.id === "manual") setOpen(true);
+                }}
+                className={cn(
+                  "rounded-xl px-2.5 py-1.5 text-[0.7rem] font-bold transition-colors",
+                  imageMode === m.id
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:bg-secondary",
+                )}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {attachments.length ? (
         <div className="mt-2 flex flex-wrap gap-2">
@@ -174,7 +186,9 @@ export function MediaStudio({
               {a.type === "image" ? (
                 <img src={a.url} alt="مرفق" className="size-16 object-cover" loading="lazy" />
               ) : (
-                <span className="grid size-16 place-items-center text-[0.65rem] font-bold">فيديو</span>
+                <span className="grid size-16 place-items-center text-[0.65rem] font-bold">
+                  فيديو
+                </span>
               )}
               <button
                 type="button"
@@ -229,7 +243,9 @@ export function MediaStudio({
                   onClick={() => onAspectChange(a.id)}
                   className={cn(
                     "rounded-lg px-2 py-1 text-[0.68rem] font-bold transition-colors",
-                    aspect === a.id ? "bg-foreground text-background" : "text-muted-foreground hover:bg-secondary",
+                    aspect === a.id
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:bg-secondary",
                   )}
                 >
                   {a.label}
@@ -244,7 +260,9 @@ export function MediaStudio({
                   onClick={() => setCount(n)}
                   className={cn(
                     "size-7 rounded-lg text-[0.68rem] font-bold transition-colors",
-                    count === n ? "bg-foreground text-background" : "text-muted-foreground hover:bg-secondary",
+                    count === n
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:bg-secondary",
                   )}
                 >
                   {n}
@@ -272,7 +290,11 @@ export function MediaStudio({
               }}
               className="ms-auto inline-flex items-center gap-1.5 rounded-xl bg-foreground px-3.5 py-2 text-xs font-bold text-background disabled:opacity-40"
             >
-              {run.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <ImagePlus className="size-3.5" />}
+              {run.isPending ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <ImagePlus className="size-3.5" />
+              )}
               ولّد الصور
             </button>
           </div>
@@ -291,7 +313,12 @@ export function MediaStudio({
                       added ? "border-jade" : "border-border hover:-translate-y-0.5",
                     )}
                   >
-                    <img src={url} alt="صورة مولّدة" className="aspect-square w-full object-cover" loading="lazy" />
+                    <img
+                      src={url}
+                      alt="صورة مولّدة"
+                      className="aspect-square w-full object-cover"
+                      loading="lazy"
+                    />
                     <span className="absolute inset-x-0 bottom-0 bg-foreground/80 py-1 text-[0.65rem] font-bold text-background">
                       {added ? "مُرفقة ✓" : "أرفقها"}
                     </span>
@@ -314,7 +341,11 @@ export function MediaStudio({
                 }}
                 className="ms-auto inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-[0.68rem] font-bold transition-colors hover:bg-secondary disabled:opacity-40"
               >
-                {sync.isPending ? <Loader2 className="size-3 animate-spin" /> : <RefreshCw className="size-3" />}
+                {sync.isPending ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <RefreshCw className="size-3" />
+                )}
                 {siteAssets.length ? "تحديث" : "اسحب صور موقعي"}
               </button>
             </div>
@@ -366,7 +397,6 @@ export function MediaStudio({
             attached={attachments.map((a) => a.url)}
             onAttach={(url) => attach(url, "video")}
           />
-
 
           <div className="flex items-center gap-2">
             <Link2 className="size-4 shrink-0 text-muted-foreground" />

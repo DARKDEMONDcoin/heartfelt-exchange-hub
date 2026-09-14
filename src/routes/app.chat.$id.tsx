@@ -18,6 +18,11 @@ import {
   Fingerprint,
   SlidersHorizontal,
   ChevronDown,
+  BookOpenText,
+  AudioLines,
+  PlugZap,
+  ImagePlus,
+  TextCursorInput,
 } from "lucide-react";
 
 import { AppShell } from "@/components/app/AppShell";
@@ -508,7 +513,9 @@ function ThreadPicker({
       >
         <History className="size-3.5 shrink-0" />
         <span>{active?.title ?? "محادثة جديدة"}</span>
-        <ChevronDown className={cn("size-3.5 shrink-0 transition-transform", open && "rotate-180")} />
+        <ChevronDown
+          className={cn("size-3.5 shrink-0 transition-transform", open && "rotate-180")}
+        />
       </button>
       {open ? (
         <div className="chat-thread-menu" role="menu">
@@ -632,6 +639,7 @@ function ChatPage() {
 
   const [showSettings, setShowSettings] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [activeTool, setActiveTool] = useState<"media" | "length" | null>(null);
   /** تلميح صوت العلامة اختياري تماماً — يُخفى نهائياً بضغطة واحدة. */
   const [voiceHintHidden, setVoiceHintHidden] = useState(true);
   useEffect(() => {
@@ -809,20 +817,6 @@ function ChatPage() {
                   </span>
                 </span>
               </div>
-              <ThreadPicker
-                conversations={conversations ?? []}
-                conversationId={conversationId}
-                onSelect={setConversationId}
-                onCreate={() =>
-                  createConversation.mutate(undefined, {
-                    onSuccess: (row) => setConversationId(row.id),
-                  })
-                }
-                onRename={(cid, title) => renameConversation.mutate({ id: cid, title })}
-                onDelete={(cid) => deleteConversation.mutate(cid)}
-                creating={createConversation.isPending}
-              />
-
               <div className="employee-command-skills">
                 <SkillPalette
                   skills={employeeSkills}
@@ -835,6 +829,26 @@ function ChatPage() {
                   }}
                 />
               </div>
+              <Link
+                to="/app/brain"
+                className="employee-command-link"
+                title="المصادر التي يقرأها الموظف"
+              >
+                <BookOpenText className="size-3.5" />
+                <span>عقل العلامة</span>
+              </Link>
+              <Link to="/app/brain" className="employee-command-link" title="نبرة وأسلوب علامتك">
+                <AudioLines className="size-3.5" />
+                <span>صوت العلامة</span>
+              </Link>
+              <Link
+                to="/app/integrations"
+                className="employee-command-link"
+                title="حسابات الموظف المرتبطة"
+              >
+                <PlugZap className="size-3.5" />
+                <span>التكاملات</span>
+              </Link>
               {owned.length ? (
                 <div className="employee-command-apps" aria-label="التطبيقات المتاحة">
                   {owned.slice(0, 5).map((integration) => (
@@ -897,15 +911,20 @@ function ChatPage() {
             {(messages ?? []).length === 0 && !pending ? (
               <div className="chat-welcome animate-pop-in">
                 <div className="chat-welcome-portraits" aria-hidden="true">
-                  <span className="chat-welcome-avatar is-user"><UserAvatar /></span>
+                  <span className="chat-welcome-avatar is-user">
+                    <UserAvatar />
+                  </span>
                   <span className="chat-welcome-avatar is-employee">
                     <Portrait memberId={member.id} name={member.name} className="size-full" />
                   </span>
                 </div>
-                <p className="chat-welcome-eyebrow">أنا {member.name}، {member.role}</p>
+                <p className="chat-welcome-eyebrow">
+                  أنا {member.name}، {member.role}
+                </p>
                 <h2>أهلًا {userName}</h2>
                 <p className="chat-welcome-rotating" aria-live="polite">
-                  {rotatingGreeting}<span className="typewriter-caret" aria-hidden="true" />
+                  {rotatingGreeting}
+                  <span className="typewriter-caret" aria-hidden="true" />
                 </p>
                 <p className="chat-welcome-tagline">{member.tagline}</p>
               </div>
@@ -1122,41 +1141,92 @@ function ChatPage() {
                 className="max-h-40 min-h-12 bg-transparent px-3 py-2.5 placeholder:text-muted-foreground/80"
               />
               {toolsOpen ? (
-                <div className="animate-fade-in border-t border-border/60 px-2 py-2">
-                  <MediaStudio
-                    workspaceId={workspace?.id}
-                    attachments={attachments}
-                    onAttachmentsChange={setAttachments}
-                    imageMode={imageMode}
-                    onImageModeChange={setImageMode}
-                    imagePrompt={imagePrompt}
-                    onImagePromptChange={setImagePrompt}
-                    aspect={aspect}
-                    onAspectChange={setAspect}
-                    disabled={busy}
-                  />
-                  <label className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-2.5 py-1.5 text-[11px] font-bold text-muted-foreground">
-                    الطول
-                    <select
-                      value={postLength}
-                      onChange={(e) => setPostLength(e.target.value as typeof postLength)}
+                <div className="chat-tool-launcher animate-fade-in" aria-label="أدوات الطلب">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool((value) => (value === "media" ? null : "media"))}
+                    className={cn("chat-tool-choice", activeTool === "media" && "is-active")}
+                    aria-expanded={activeTool === "media"}
+                  >
+                    <ImagePlus className="size-4" /> الوسائط
+                    {attachments.length ? <span>{attachments.length}</span> : null}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTool((value) => (value === "length" ? null : "length"))}
+                    className={cn("chat-tool-choice", activeTool === "length" && "is-active")}
+                    aria-expanded={activeTool === "length"}
+                  >
+                    <TextCursorInput className="size-4" /> الطول
+                  </button>
+                </div>
+              ) : null}
+              {activeTool ? (
+                <div className="chat-tool-popover animate-pop-in">
+                  <div className="chat-tool-popover-head">
+                    <div>
+                      <p>{activeTool === "media" ? "الوسائط" : "طول المحتوى"}</p>
+                      <span>
+                        {activeTool === "media"
+                          ? "أرفق أو أنشئ ما يحتاجه الطلب"
+                          : "اختر الحجم الأنسب لهذه النتيجة"}
+                      </span>
+                    </div>
+                    <button type="button" onClick={() => setActiveTool(null)} aria-label="إغلاق">
+                      <X className="size-4" />
+                    </button>
+                  </div>
+                  {activeTool === "media" ? (
+                    <MediaStudio
+                      workspaceId={workspace?.id}
+                      attachments={attachments}
+                      onAttachmentsChange={setAttachments}
+                      imageMode={imageMode}
+                      onImageModeChange={setImageMode}
+                      imagePrompt={imagePrompt}
+                      onImagePromptChange={setImagePrompt}
+                      aspect={aspect}
+                      onAspectChange={setAspect}
                       disabled={busy}
-                      aria-label="طول المنشور"
-                      className="bg-transparent text-xs font-bold text-foreground outline-none disabled:opacity-60"
-                    >
-                      <option value="auto">تلقائي</option>
-                      <option value="short">قصير</option>
-                      <option value="medium">متوسط</option>
-                      <option value="long">مطوّل</option>
-                    </select>
-                  </label>
+                      defaultOpen
+                      hideTrigger
+                    />
+                  ) : (
+                    <div className="chat-length-options">
+                      {(
+                        [
+                          ["auto", "تلقائي", "يقرر الموظف الأنسب"],
+                          ["short", "قصير", "مباشر وسريع"],
+                          ["medium", "متوسط", "متوازن ومفصل"],
+                          ["long", "مطوّل", "شامل ومتعمق"],
+                        ] as const
+                      ).map(([value, label, hint]) => (
+                        <button
+                          key={value}
+                          type="button"
+                          disabled={busy}
+                          onClick={() => setPostLength(value)}
+                          className={cn("chat-length-option", postLength === value && "is-active")}
+                        >
+                          <span>{label}</span>
+                          <small>{hint}</small>
+                          {postLength === value ? <Check className="size-4" /> : null}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : null}
               <PromptInputFooter>
                 <PromptInputTools>
                   <PromptInputButton
                     type="button"
-                    onClick={() => setToolsOpen((value) => !value)}
+                    onClick={() => {
+                      setToolsOpen((value) => {
+                        if (value) setActiveTool(null);
+                        return !value;
+                      });
+                    }}
                     aria-expanded={toolsOpen}
                     aria-label="أدوات الطلب"
                     title="الوسائط وإعدادات الطلب"
@@ -1190,9 +1260,22 @@ function ChatPage() {
             showSettings ? "is-open" : "",
           )}
         >
+          <div className="chat-side-employee">
+            <span className="relative block size-14 shrink-0 overflow-hidden rounded-xl">
+              <Portrait memberId={member.id} name={member.name} className="size-full" />
+              <span className="absolute bottom-1 end-1 size-2.5 rounded-full border-2 border-card bg-primary" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base font-black">{member.name}</span>
+              <span className="block truncate text-xs text-muted-foreground">{member.role}</span>
+            </span>
+            <button type="button" onClick={() => setShowSettings(false)} aria-label="إغلاق القائمة">
+              <X className="size-4" />
+            </button>
+          </div>
           {owned.length ? (
-            <section className="mb-5 border-b border-border pb-5">
-              <p className="text-[0.68rem] font-bold text-muted-foreground">الأدوات المتصلة</p>
+            <section className="chat-side-section">
+              <p className="chat-side-label">حسابات {member.name}</p>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 {owned.map((integration) => (
                   <span
@@ -1214,9 +1297,9 @@ function ChatPage() {
               </div>
             </section>
           ) : null}
-          <div className="mb-5 border-b border-border pb-4">
+          <div className="chat-side-section">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-display font-black">المحادثات</h2>
+              <h2 className="font-display font-black">محادثات {member.name}</h2>
               <button
                 type="button"
                 aria-label="محادثة جديدة"
@@ -1241,7 +1324,7 @@ function ChatPage() {
                 <div
                   key={conversation.id}
                   className={cn(
-                    "group flex items-center gap-1 rounded-lg border px-2 py-2",
+                    "chat-side-thread group",
                     conversation.id === conversationId
                       ? "border-primary/40 bg-primary/10"
                       : "border-transparent hover:bg-secondary/70",
@@ -1275,19 +1358,42 @@ function ChatPage() {
               ))}
             </div>
           </div>
-          <ActionPanel
-            employeeId={id}
-            workspaceId={workspace?.id}
-            connected={(integrations ?? [])
-              .filter((i) => i.status === "connected")
-              .map((i) => i.provider)}
-          />
-          <Link
-            to="/app/brain"
-            className="mt-5 block rounded-lg bg-secondary/60 p-3 text-xs font-semibold transition-colors hover:bg-secondary"
-          >
-            عقل العلامة ومصادر المعرفة ↖
-          </Link>
+          <section className="chat-side-section">
+            <p className="chat-side-label mb-3">التنفيذ والمتابعة</p>
+            <ActionPanel
+              employeeId={id}
+              workspaceId={workspace?.id}
+              connected={(integrations ?? [])
+                .filter((i) => i.status === "connected")
+                .map((i) => i.provider)}
+            />
+          </section>
+          <div className="chat-side-links">
+            <Link to="/app/brain">
+              <BookOpenText className="size-4" />
+              <span>
+                اقرأ عقل العلامة<small>{brainItems?.length ?? 0} مصادر معرفة</small>
+              </span>
+              <ArrowUpLeft className="size-3.5" />
+            </Link>
+            <Link to="/app/brain">
+              <AudioLines className="size-4" />
+              <span>
+                صوت العلامة<small>{hasVoiceGuide ? "جاهز للاستخدام" : "أضف نبرة علامتك"}</small>
+              </span>
+              <ArrowUpLeft className="size-3.5" />
+            </Link>
+            <Link to="/app/integrations">
+              <PlugZap className="size-4" />
+              <span>
+                كل التكاملات
+                <small>
+                  {owned.filter((item) => item.status === "connected").length} حسابات متصلة
+                </small>
+              </span>
+              <ArrowUpLeft className="size-3.5" />
+            </Link>
+          </div>
         </aside>
       </div>
     </AppShell>

@@ -11595,10 +11595,17 @@ section:has(> .integration-grid-wave) {
   animation: chat-caret 0.85s steps(1) infinite;
 }
 @keyframes chat-caret {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
 .chat-composer-dock {
-  background: linear-gradient(to top, var(--background) 18%, color-mix(in oklab, var(--background) 72%, transparent) 68%, transparent);
+  background: linear-gradient(
+    to top,
+    var(--background) 18%,
+    color-mix(in oklab, var(--background) 72%, transparent) 68%,
+    transparent
+  );
 }
 .chat-composer {
   background: color-mix(in oklab, var(--background) 54%, transparent);
@@ -11684,8 +11691,12 @@ section:has(> .integration-grid-wave) {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .typewriter-caret { animation: none; }
-  .chat-thread-panel { transition: none; }
+  .typewriter-caret {
+    animation: none;
+  }
+  .chat-thread-panel {
+    transition: none;
+  }
 }
 
 /* الصفحة الرئيسية: أبيض وحبر كقاعدة، والذهب هو الإشارة البصرية الأساسية. */
@@ -12334,5 +12345,291 @@ section:has(> .integration-grid-wave) {
   }
   .chat-smoke b {
     opacity: 0.25;
+  }
+}
+
+/* شريط الموظف الموحد: كل الأدوات في سطر واحد واضح وقابل للسحب على الشاشات الضيقة. */
+.employee-command-bar {
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+}
+.employee-command-bar::-webkit-scrollbar {
+  display: none;
+}
+.employee-command-link {
+  display: inline-flex;
+  min-height: 2.3rem;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid color-mix(in oklab, var(--chat-accent) 14%, var(--border));
+  border-radius: 0.7rem;
+  padding-inline: 0.7rem;
+  background: color-mix(in oklab, var(--card) 48%, transparent);
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+.employee-command-link:hover {
+  border-color: color-mix(in oklab, var(--chat-accent) 45%, var(--border));
+  background: color-mix(in oklab, var(--chat-accent) 9%, transparent);
+  color: var(--foreground);
+  transform: translateY(-1px);
+}
+
+/* لوحة محادثات الموظف: هوية، حسابات، سجل، تنفيذ، ومراجع في تسلسل بصري واحد. */
+.chat-thread-panel {
+  padding: 0.9rem;
+  border-color: color-mix(in oklab, var(--chat-accent) 18%, var(--border));
+  background:
+    linear-gradient(
+      150deg,
+      color-mix(in oklab, var(--chat-accent) 8%, transparent),
+      transparent 16rem
+    ),
+    color-mix(in oklab, var(--card) 88%, transparent);
+  backdrop-filter: blur(28px) saturate(1.18);
+}
+.chat-side-employee {
+  position: sticky;
+  z-index: 2;
+  top: -0.9rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  margin: -0.9rem -0.9rem 0.8rem;
+  padding: 1rem 0.9rem 0.85rem;
+  border-bottom: 1px solid color-mix(in oklab, var(--chat-accent) 18%, var(--border));
+  background: color-mix(in oklab, var(--card) 82%, transparent);
+  backdrop-filter: blur(22px);
+}
+.chat-side-employee > button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  color: var(--muted-foreground);
+  transition: 180ms ease;
+}
+.chat-side-employee > button:hover {
+  background: var(--secondary);
+  color: var(--foreground);
+}
+.chat-side-section {
+  margin-bottom: 0.75rem;
+  padding: 0.8rem;
+  border: 1px solid color-mix(in oklab, var(--chat-accent) 12%, var(--border));
+  border-radius: 0.75rem;
+  background: color-mix(in oklab, var(--background) 52%, transparent);
+}
+.chat-side-label {
+  color: var(--muted-foreground);
+  font-size: 0.67rem;
+  font-weight: 800;
+}
+.chat-side-thread {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
+  padding: 0.25rem 0.35rem;
+  transition: 180ms ease;
+}
+.chat-side-thread:hover {
+  background: color-mix(in oklab, var(--chat-accent) 7%, transparent);
+}
+.chat-side-links {
+  display: grid;
+  gap: 0.45rem;
+}
+.chat-side-links > a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 3.5rem;
+  border: 1px solid color-mix(in oklab, var(--chat-accent) 14%, var(--border));
+  border-radius: 0.7rem;
+  padding: 0.65rem 0.75rem;
+  background: color-mix(in oklab, var(--background) 48%, transparent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  transition: 180ms ease;
+}
+.chat-side-links > a:hover {
+  border-color: color-mix(in oklab, var(--chat-accent) 42%, var(--border));
+  background: color-mix(in oklab, var(--chat-accent) 8%, transparent);
+}
+.chat-side-links small {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--muted-foreground);
+  font-size: 0.62rem;
+  font-weight: 600;
+}
+
+/* قائمتا الوسائط والطول تطفوان أعلى مربع الكتابة بزجاج شفاف. */
+.chat-tool-launcher {
+  display: flex;
+  gap: 0.45rem;
+  padding: 0.3rem 0.35rem 0.45rem;
+  border-top: 1px solid color-mix(in oklab, var(--chat-accent) 14%, var(--border));
+}
+.chat-tool-choice {
+  display: inline-flex;
+  min-height: 2.15rem;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  padding-inline: 0.75rem;
+  background: color-mix(in oklab, var(--background) 42%, transparent);
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+  font-weight: 800;
+  transition: 180ms ease;
+}
+.chat-tool-choice > span {
+  display: grid;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 0.58rem;
+}
+.chat-tool-choice:hover,
+.chat-tool-choice.is-active {
+  border-color: color-mix(in oklab, var(--chat-accent) 52%, var(--border));
+  background: color-mix(in oklab, var(--chat-accent) 10%, transparent);
+  color: var(--foreground);
+}
+.chat-tool-popover {
+  position: absolute;
+  z-index: 35;
+  inset-inline: 0;
+  bottom: calc(100% + 0.65rem);
+  max-height: min(65dvh, 36rem);
+  overflow-y: auto;
+  border: 1px solid color-mix(in oklab, var(--chat-accent) 24%, var(--border));
+  border-radius: 0.9rem;
+  padding: 0.75rem;
+  background:
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--chat-accent) 8%, transparent),
+      transparent 50%
+    ),
+    color-mix(in oklab, var(--background) 76%, transparent);
+  box-shadow: 0 28px 70px -40px var(--foreground);
+  backdrop-filter: blur(26px) saturate(1.18);
+}
+.chat-tool-popover-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.65rem;
+  padding: 0.1rem 0.15rem 0.65rem;
+  border-bottom: 1px solid var(--border);
+}
+.chat-tool-popover-head p {
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+.chat-tool-popover-head span {
+  color: var(--muted-foreground);
+  font-size: 0.65rem;
+}
+.chat-tool-popover-head button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 0.6rem;
+  color: var(--muted-foreground);
+}
+.chat-tool-popover-head button:hover {
+  background: var(--secondary);
+  color: var(--foreground);
+}
+.chat-length-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.chat-length-option {
+  position: relative;
+  display: flex;
+  min-height: 4.4rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  padding: 0.65rem;
+  background: color-mix(in oklab, var(--card) 55%, transparent);
+  text-align: start;
+  transition: 180ms ease;
+}
+.chat-length-option > span {
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+.chat-length-option small {
+  color: var(--muted-foreground);
+  font-size: 0.62rem;
+}
+.chat-length-option svg {
+  position: absolute;
+  top: 0.55rem;
+  inset-inline-end: 0.55rem;
+  color: var(--chat-accent);
+}
+.chat-length-option:hover,
+.chat-length-option.is-active {
+  border-color: color-mix(in oklab, var(--chat-accent) 55%, var(--border));
+  background: color-mix(in oklab, var(--chat-accent) 10%, transparent);
+}
+
+@media (max-width: 640px) {
+  .employee-command-bar {
+    margin-inline: -0.75rem;
+    border-inline: 0;
+    border-radius: 0;
+  }
+  .employee-command-identity {
+    position: sticky;
+    z-index: 2;
+    inset-inline-start: 0;
+    background: color-mix(in oklab, var(--background) 88%, transparent);
+    backdrop-filter: blur(18px);
+  }
+  .employee-command-skills {
+    min-width: max-content;
+    flex: 0 0 auto;
+  }
+  .employee-command-link span {
+    display: inline;
+  }
+  .chat-length-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .chat-tool-popover {
+    inset-inline: -0.15rem;
+    max-height: 58dvh;
+    padding: 0.6rem;
   }
 }
