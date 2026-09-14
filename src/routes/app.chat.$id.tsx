@@ -822,7 +822,7 @@ function ChatView({
       padded={false}
       compactTitle
       actions={
-        <div className="no-scrollbar flex min-w-0 flex-1 items-center justify-end gap-1 overflow-x-auto sm:gap-1.5">
+        <div className="chat-topbar-actions no-scrollbar flex min-w-0 flex-1 items-center justify-end gap-1 overflow-x-auto sm:gap-1.5">
           <SkillPalette
             skills={employeeSkills}
             quick={quickSkills}
@@ -897,7 +897,7 @@ function ChatView({
               inputRef.current?.focus();
             }}
             disabled={!workspace}
-            className="grid size-9 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-secondary disabled:opacity-50"
+            className="chat-new-button grid size-9 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-secondary disabled:opacity-50"
             aria-label="محادثة جديدة"
             title="محادثة جديدة"
           >
