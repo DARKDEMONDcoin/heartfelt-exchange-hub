@@ -1147,8 +1147,12 @@ function ChatView({
             ) : null}
 
             {embeddedTool?.mode === "inline" ? (
-              <section className="chat-inline-tool" aria-label={embeddedTool.tool.title}>
-                <header>
+              <section
+                className="chat-inline-tool"
+                aria-label={embeddedTool.tool.title}
+                style={toolStyle}
+              >
+                <header className="chat-tool-drag" {...dragHandlers}>
                   <div>
                     <strong>{embeddedTool.tool.title}</strong>
                     <span>تعمل داخل محادثة {member.name}</span>
