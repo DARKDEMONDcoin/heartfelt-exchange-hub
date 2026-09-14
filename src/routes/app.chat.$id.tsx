@@ -1162,7 +1162,7 @@ function ChatPage() {
                 </div>
               ) : null}
               {activeTool ? (
-                <div className="chat-tool-popover animate-pop-in">
+                <div className="chat-tool-popover">
                   <div className="chat-tool-popover-head">
                     <div>
                       <p>{activeTool === "media" ? "الوسائط" : "طول المحتوى"}</p>
