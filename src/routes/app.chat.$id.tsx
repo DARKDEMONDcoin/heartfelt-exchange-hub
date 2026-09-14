@@ -1232,6 +1232,131 @@ function ChatPage() {
           </div>
         </div>
 
+        {barPanel ? (
+          <>
+            <button
+              type="button"
+              aria-label="إغلاق اللوحة"
+              onClick={() => setBarPanel(null)}
+              className="topbar-sheet-backdrop"
+            />
+            <section
+              className="topbar-sheet"
+              aria-label={barPanel === "apps" ? `تكاملات ${member.name}` : "عقل وصوت العلامة"}
+            >
+              <div className="topbar-sheet-head">
+                {barPanel === "apps" ? (
+                  <PlugZap className="size-4 text-primary" />
+                ) : (
+                  <Fingerprint className="size-4 text-primary" />
+                )}
+                <div>
+                  <p>{barPanel === "apps" ? `تكاملات ${member.name}` : "عقل وصوت العلامة"}</p>
+                  <span>
+                    {barPanel === "apps"
+                      ? "اربط الحسابات التي يحتاجها من هنا مباشرة"
+                      : "المصادر التي يقرأها ونبرة كتابته"}
+                  </span>
+                </div>
+                <button type="button" onClick={() => setBarPanel(null)} aria-label="إغلاق">
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              {barPanel === "apps" ? (
+                <div className="mt-1">
+                  {member.apps.map((provider) => {
+                    const row = owned.find((i) => i.provider === provider);
+                    const connected = row?.status === "connected";
+                    return (
+                      <div key={provider} className="topbar-app-row">
+                        <AppIcon name={provider} className="size-5 shrink-0" />
+                        <span className="truncate">{appLabel(provider)}</span>
+                        {connected ? (
+                          <span className="is-connected">متصل</span>
+                        ) : (
+                          <span className="ms-auto shrink-0">
+                            <ConnectNow
+                              workspaceId={workspace?.id}
+                              provider={provider}
+                              size="sm"
+                              label="اربط"
+                            />
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-3 space-y-3">
+                  <div className="rounded-2xl border border-border/70 p-3">
+                    <p className="flex items-center gap-2 text-xs font-black">
+                      <BookOpenText className="size-4 text-primary" /> عقل العلامة
+                      <span className="ms-auto text-[0.66rem] font-bold text-muted-foreground">
+                        {brainItems?.length ?? 0} مصادر
+                      </span>
+                    </p>
+                    <div className="mt-2 space-y-1">
+                      {(brainItems ?? []).slice(0, 5).map((item) => (
+                        <p key={item.id} className="truncate text-[0.72rem] text-muted-foreground">
+                          • {item.title}
+                        </p>
+                      ))}
+                      {(brainItems ?? []).length === 0 ? (
+                        <p className="text-[0.72rem] text-muted-foreground">
+                          لا مصادر بعد — الصق رابط موقعك ليقرأه {member.name}.
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <input
+                        value={brandSource}
+                        onChange={(e) => setBrandSource(e.target.value)}
+                        placeholder="رابط أو ملاحظة عن علامتك…"
+                        dir="auto"
+                        className="min-w-0 flex-1 rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none focus:border-primary"
+                      />
+                      <button
+                        type="button"
+                        disabled={!workspace || !brandSource.trim() || addBrainItem.isPending}
+                        onClick={() =>
+                          addBrainItem.mutate(
+                            {
+                              kind: brandSource.trim().startsWith("http") ? "link" : "note",
+                              title: brandSource.trim().slice(0, 120),
+                              body: brandSource.trim(),
+                            },
+                            { onSuccess: () => setBrandSource("") },
+                          )
+                        }
+                        className="shrink-0 rounded-full bg-foreground px-3 py-2 text-[0.7rem] font-bold text-background disabled:opacity-50"
+                      >
+                        {addBrainItem.isPending ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          "أضف"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-border/70 p-3">
+                    <p className="flex items-center gap-2 text-xs font-black">
+                      <AudioLines className="size-4 text-primary" /> صوت العلامة
+                      <span className="ms-auto text-[0.66rem] font-bold text-muted-foreground">
+                        {hasVoiceGuide ? "جاهز" : "غير مضبوط"}
+                      </span>
+                    </p>
+                    <div className="mt-2">
+                      <BrandVoiceExtractor workspaceId={workspace?.id} compact />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </section>
+          </>
+        ) : null}
+
         {showSettings ? (
           <button
             type="button"
