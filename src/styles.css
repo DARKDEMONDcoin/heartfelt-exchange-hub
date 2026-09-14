@@ -13495,3 +13495,17 @@ section:has(> .integration-grid-wave) {
     animation: none;
   }
 }
+
+/* رأس لوحة الأداة قابل للسحب داخل نفس المحادثة. */
+.chat-tool-drag {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.chat-tool-drag:active {
+  cursor: grabbing;
+}
+.chat-inline-tool,
+.chat-embedded-tool {
+  will-change: transform;
+}
