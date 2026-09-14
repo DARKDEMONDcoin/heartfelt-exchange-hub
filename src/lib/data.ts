@@ -18,8 +18,7 @@ export function taskSteps(task: Task): TaskStep[] {
   const raw = task.steps;
   if (!Array.isArray(raw)) return [];
   return raw.filter(
-    (s): s is TaskStep =>
-      !!s && typeof s === "object" && "label" in (s as Record<string, unknown>),
+    (s): s is TaskStep => !!s && typeof s === "object" && "label" in (s as Record<string, unknown>),
   );
 }
 
@@ -75,17 +74,13 @@ export function useUpdateNotificationPreferences() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (
-      patch: Omit<
-        NotificationPreferences,
-        "user_id" | "created_at" | "updated_at"
-      >,
+      patch: Omit<NotificationPreferences, "user_id" | "created_at" | "updated_at">,
     ) => {
       const { data: auth } = await supabase.auth.getUser();
       if (!auth.user) throw new Error("سجّل الدخول لحفظ تفضيلات التنبيهات.");
-      const { error } = await supabase.from("notification_preferences").upsert(
-        { user_id: auth.user.id, ...patch },
-        { onConflict: "user_id" },
-      );
+      const { error } = await supabase
+        .from("notification_preferences")
+        .upsert({ user_id: auth.user.id, ...patch }, { onConflict: "user_id" });
       if (error) throw new Error(error.message);
     },
     onSuccess: () => {
@@ -143,15 +138,33 @@ export function useConversations(workspaceId: string | undefined, employeeId: st
   return useQuery({
     queryKey: ["conversations", workspaceId, employeeId],
     enabled: !!workspaceId,
-    queryFn: () =>
-      must<Conversation[]>(
+    queryFn: async () => {
+      const conversations = await must<Conversation[]>(
         supabase
           .from("conversations")
           .select("*")
           .eq("workspace_id", workspaceId!)
           .eq("employee_id", employeeId)
           .order("updated_at", { ascending: false }),
-      ),
+      );
+      if (!conversations.length) return [];
+
+      const messageRows = await must<Array<{ conversation_id: string | null }>>(
+        supabase
+          .from("messages")
+          .select("conversation_id")
+          .eq("workspace_id", workspaceId!)
+          .eq("employee_id", employeeId)
+          .in(
+            "conversation_id",
+            conversations.map((conversation) => conversation.id),
+          ),
+      );
+      const nonEmptyIds = new Set(
+        messageRows.map((message) => message.conversation_id).filter(Boolean),
+      );
+      return conversations.filter((conversation) => nonEmptyIds.has(conversation.id));
+    },
   });
 }
 
@@ -168,7 +181,8 @@ export function useCreateConversation(workspaceId: string | undefined, employeeI
       );
       return row;
     },
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["conversations", workspaceId, employeeId] }),
+    onSuccess: () =>
+      void qc.invalidateQueries({ queryKey: ["conversations", workspaceId, employeeId] }),
   });
 }
 
@@ -176,10 +190,14 @@ export function useRenameConversation(workspaceId: string | undefined, employeeI
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, title }: { id: string; title: string }) => {
-      const { error } = await supabase.from("conversations").update({ title: title.slice(0, 80) }).eq("id", id);
+      const { error } = await supabase
+        .from("conversations")
+        .update({ title: title.slice(0, 80) })
+        .eq("id", id);
       if (error) throw new Error(error.message);
     },
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["conversations", workspaceId, employeeId] }),
+    onSuccess: () =>
+      void qc.invalidateQueries({ queryKey: ["conversations", workspaceId, employeeId] }),
   });
 }
 
@@ -190,11 +208,16 @@ export function useDeleteConversation(workspaceId: string | undefined, employeeI
       const { error } = await supabase.from("conversations").delete().eq("id", id);
       if (error) throw new Error(error.message);
     },
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ["conversations", workspaceId, employeeId] }),
+    onSuccess: () =>
+      void qc.invalidateQueries({ queryKey: ["conversations", workspaceId, employeeId] }),
   });
 }
 
-export function useMessages(workspaceId: string | undefined, employeeId: string, conversationId?: string) {
+export function useMessages(
+  workspaceId: string | undefined,
+  employeeId: string,
+  conversationId?: string,
+) {
   return useQuery({
     queryKey: ["messages", workspaceId, employeeId, conversationId],
     enabled: !!workspaceId && !!conversationId,
@@ -274,7 +297,10 @@ export function useSetIntegrationStatus(workspaceId?: string) {
       status: string;
       account: string | null;
     }) => {
-      const { error } = await supabase.from("integrations").update({ status, account }).eq("id", id);
+      const { error } = await supabase
+        .from("integrations")
+        .update({ status, account })
+        .eq("id", id);
       if (error) throw new Error(error.message);
     },
     onSuccess: () => {

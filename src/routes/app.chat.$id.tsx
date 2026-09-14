@@ -25,6 +25,11 @@ import {
   CalendarDays,
   Bot,
   ListChecks,
+  ExternalLink,
+  ArrowRight,
+  Plane,
+  CalendarClock,
+  CheckCircle2,
 } from "lucide-react";
 
 import { AppShell } from "@/components/app/AppShell";
@@ -360,8 +365,78 @@ function prettyBody(body: string): string {
 }
 
 function timeOf(iso: string) {
-  return new Date(iso).toLocaleTimeString("ar", { hour: "2-digit", minute: "2-digit" });
+  const parts = new Intl.DateTimeFormat("ar-EG", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).formatToParts(new Date(iso));
+  const value = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return `${value("hour")}:${value("minute")} ${value("dayPeriod")}`.trim();
 }
+
+type WorkTool = {
+  id: string;
+  title: string;
+  description: string;
+  to:
+    | "/app/tasks"
+    | "/app/autopilot"
+    | "/app/calendar"
+    | "/app/automations"
+    | "/app/queue"
+    | "/app/approvals";
+  icon: typeof ListChecks;
+  sonnyOnly?: boolean;
+};
+
+const WORK_TOOLS: WorkTool[] = [
+  {
+    id: "tasks",
+    title: "المهام",
+    description: "تابع التنفيذ خطوة بخطوة",
+    to: "/app/tasks",
+    icon: ListChecks,
+  },
+  {
+    id: "autopilot",
+    title: "الطيار الآلي",
+    description: "شغّل صناعة ونشر المحتوى",
+    to: "/app/autopilot",
+    icon: Plane,
+    sonnyOnly: true,
+  },
+  {
+    id: "calendar",
+    title: "تقويم المحتوى",
+    description: "خطّط وراجع المحتوى بصريًا",
+    to: "/app/calendar",
+    icon: CalendarDays,
+    sonnyOnly: true,
+  },
+  {
+    id: "automations",
+    title: "الجدولة التلقائية",
+    description: "كرّر المهام في مواعيدها",
+    to: "/app/automations",
+    icon: CalendarClock,
+  },
+  {
+    id: "queue",
+    title: "طابور النشر",
+    description: "راقب المنشورات ومواعيدها",
+    to: "/app/queue",
+    icon: History,
+    sonnyOnly: true,
+  },
+  {
+    id: "approvals",
+    title: "الموافقات",
+    description: "راجع واعتمد النتائج",
+    to: "/app/approvals",
+    icon: CheckCircle2,
+  },
+];
 
 const EMPLOYEE_COPY: Record<string, { prompts: string[]; greetings: string[] }> = {
   sonny: {
@@ -500,6 +575,7 @@ function ChatView({
   const { data: profile } = useProfile();
   const { data: conversations } = useConversations(workspace?.id, id);
   const [conversationId, setConversationId] = useState<string | undefined>();
+  const [startingNewConversation, setStartingNewConversation] = useState(false);
   const createConversation = useCreateConversation(workspace?.id, id);
   const renameConversation = useRenameConversation(workspace?.id, id);
   const deleteConversation = useDeleteConversation(workspace?.id, id);
@@ -532,27 +608,15 @@ function ChatView({
   const [postLength, setPostLength] = useState<"auto" | "short" | "medium" | "long">("auto");
 
   useEffect(() => {
-    if (!conversationId && conversations?.[0]) setConversationId(conversations[0].id);
-    if (conversationId && conversations && !conversations.some((c) => c.id === conversationId)) {
-      setConversationId(conversations[0]?.id);
-    }
-  }, [conversationId, conversations]);
-
-  useEffect(() => {
-    if (
-      !workspace ||
-      conversations === undefined ||
-      conversations.length > 0 ||
-      createConversation.isPending
-    )
-      return;
-    createConversation.mutate(undefined, { onSuccess: (row) => setConversationId(row.id) });
-  }, [workspace, conversations, createConversation]);
+    if (!startingNewConversation && !conversationId && conversations?.[0])
+      setConversationId(conversations[0].id);
+  }, [conversationId, conversations, startingNewConversation]);
 
   /** لوحات الشريط العلوي — تُفتح كلها داخل نفس الصفحة. */
   const [barPanel, setBarPanel] = useState<"apps" | "brand" | "chats" | "work" | null>(null);
   const [brandSource, setBrandSource] = useState("");
   const [conversationSearch, setConversationSearch] = useState("");
+  const [embeddedTool, setEmbeddedTool] = useState<WorkTool | null>(null);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [activeTool, setActiveTool] = useState<"media" | "length" | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -583,12 +647,18 @@ function ChatView({
   );
 
   const send = useMutation({
-    mutationFn: (message: string) =>
-      ask({
+    mutationFn: async (message: string) => {
+      const activeConversationId =
+        startingNewConversation || !conversationId
+          ? (await createConversation.mutateAsync()).id
+          : conversationId;
+      if (!conversationId) setConversationId(activeConversationId);
+      setStartingNewConversation(false);
+      const result = await ask({
         data: {
           workspaceId: workspace!.id,
           employeeId: id,
-          conversationId: conversationId!,
+          conversationId: activeConversationId,
           message,
           attachments,
           imageMode,
@@ -596,10 +666,14 @@ function ChatView({
           imageAspect: aspect,
           postLength,
         },
-      }),
+      });
+      return { result, activeConversationId };
+    },
 
-    onSuccess: async (res) => {
-      await qc.invalidateQueries({ queryKey: ["messages", workspace?.id, id, conversationId] });
+    onSuccess: async ({ result: res, activeConversationId }) => {
+      await qc.invalidateQueries({
+        queryKey: ["messages", workspace?.id, id, activeConversationId],
+      });
       if (cancelledRef.current) {
         cancelledRef.current = false;
         return;
@@ -629,16 +703,23 @@ function ChatView({
   });
 
   const skillRun = useMutation({
-    mutationFn: (p: { skill: Skill; values: Record<string, string> }) =>
-      runSkillFn({
+    mutationFn: async (p: { skill: Skill; values: Record<string, string> }) => {
+      const activeConversationId =
+        startingNewConversation || !conversationId
+          ? (await createConversation.mutateAsync()).id
+          : conversationId;
+      if (!conversationId) setConversationId(activeConversationId);
+      setStartingNewConversation(false);
+      return runSkillFn({
         data: {
           workspaceId: workspace!.id,
           employeeId: id,
           skillId: p.skill.id,
           values: p.values,
-          conversationId: conversationId!,
+          conversationId: activeConversationId,
         },
-      }),
+      });
+    },
     onSuccess: (res) => {
       setSavedTask(Boolean(res?.taskId));
       void qc.invalidateQueries({ queryKey: ["messages", workspace?.id, id, conversationId] });
@@ -673,7 +754,7 @@ function ChatView({
 
   const submit = (text: string) => {
     const body = text.trim();
-    if (!body || !workspace || !conversationId || busy) return;
+    if (!body || !workspace || busy) return;
     setError(null);
     setSavedTask(false);
 
@@ -768,21 +849,21 @@ function ChatView({
           </button>
           <button
             type="button"
-            onClick={() =>
-              createConversation.mutate(undefined, {
-                onSuccess: (row) => setConversationId(row.id),
-              })
-            }
-            disabled={!workspace || createConversation.isPending}
+            onClick={() => {
+              setStartingNewConversation(true);
+              setConversationId(undefined);
+              setBarPanel(null);
+              setDraft("");
+              setPending(null);
+              setError(null);
+              inputRef.current?.focus();
+            }}
+            disabled={!workspace}
             className="grid size-9 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-secondary disabled:opacity-50"
             aria-label="محادثة جديدة"
             title="محادثة جديدة"
           >
-            {createConversation.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Plus className="size-4" />
-            )}
+            <Plus className="size-4" />
           </button>
         </div>
       }
@@ -810,7 +891,7 @@ function ChatView({
               <b />
             </div>
           ) : null}
-          <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 sm:px-6">
+          <div className="chat-message-column relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-3 sm:px-6">
             {(messages ?? []).length === 0 && !pending ? (
               <div className="chat-welcome animate-pop-in">
                 <div className="chat-welcome-portraits" aria-hidden="true">
@@ -1028,7 +1109,7 @@ function ChatView({
             <div ref={endRef} />
           </div>
 
-          <div className="chat-composer-dock pointer-events-none sticky bottom-0 z-20 mt-auto p-3 sm:p-5">
+          <div className="chat-composer-dock pointer-events-none p-3 sm:p-5">
             <PromptInput
               onSubmit={(message) => submit(message.text || draft)}
               className="chat-composer pointer-events-auto mx-auto max-w-4xl rounded-2xl border border-border/70 p-2 transition-all focus-within:border-primary/55 focus-within:ring-4 focus-within:ring-primary/10"
@@ -1158,6 +1239,29 @@ function ChatView({
             </PromptInput>
           </div>
         </div>
+
+        {embeddedTool ? (
+          <section className="chat-embedded-tool" aria-label={embeddedTool.title}>
+            <header>
+              <button
+                type="button"
+                onClick={() => setEmbeddedTool(null)}
+                aria-label="العودة للمحادثة"
+              >
+                <ArrowRight className="size-4" />
+              </button>
+              <div>
+                <strong>{embeddedTool.title}</strong>
+                <span>مفتوحة داخل محادثة {member.name}</span>
+              </div>
+              <Link to={embeddedTool.to} title="فتح الصفحة الكاملة">
+                <ExternalLink className="size-4" />
+                <span>الصفحة الكاملة</span>
+              </Link>
+            </header>
+            <iframe src={`${embeddedTool.to}?embedded=1`} title={embeddedTool.title} />
+          </section>
+        ) : null}
 
         {barPanel ? (
           <>
@@ -1316,22 +1420,19 @@ function ChatView({
                   </label>
                   <button
                     type="button"
-                    disabled={!workspace || createConversation.isPending}
-                    onClick={() =>
-                      createConversation.mutate(undefined, {
-                        onSuccess: (row) => {
-                          setConversationId(row.id);
-                          setBarPanel(null);
-                        },
-                      })
-                    }
+                    disabled={!workspace}
+                    onClick={() => {
+                      setStartingNewConversation(true);
+                      setConversationId(undefined);
+                      setBarPanel(null);
+                      setDraft("");
+                      setPending(null);
+                      setError(null);
+                      inputRef.current?.focus();
+                    }}
                     className="chat-history-new"
                   >
-                    {createConversation.isPending ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Plus className="size-4" />
-                    )}
+                    <Plus className="size-4" />
                     محادثة جديدة
                   </button>
                   <div className="chat-history-list">
@@ -1346,6 +1447,7 @@ function ChatView({
                         <button
                           type="button"
                           onClick={() => {
+                            setStartingNewConversation(false);
                             setConversationId(conversation.id);
                             setBarPanel(null);
                           }}
@@ -1379,44 +1481,49 @@ function ChatView({
                 </div>
               ) : (
                 <div className="chat-work-sheet">
-                  <ActionPanel
-                    employeeId={id}
-                    workspaceId={workspace?.id}
-                    connected={(integrations ?? [])
-                      .filter((integration) => integration.status === "connected")
-                      .map((integration) => integration.provider)}
-                  />
-                  <div className="chat-work-links">
-                    <Link to="/app/tasks">
-                      <ListChecks className="size-4" />
-                      <span>المهام</span>
-                    </Link>
-                    <Link to="/app/automations">
-                      <Bot className="size-4" />
-                      <span>الجدولة التلقائية</span>
-                    </Link>
-                    <Link to="/app/approvals">
-                      <Check className="size-4" />
-                      <span>الموافقات</span>
-                    </Link>
-                    {id === "sonny" ? (
-                      <Link to="/app/calendar">
-                        <CalendarDays className="size-4" />
-                        <span>تقويم المحتوى</span>
-                      </Link>
-                    ) : null}
-                    {id === "sonny" ? (
-                      <Link to="/app/queue">
-                        <History className="size-4" />
-                        <span>طابور النشر</span>
-                      </Link>
-                    ) : null}
-                    {id === "sonny" ? (
-                      <Link to="/app/autopilot">
-                        <Bot className="size-4" />
-                        <span>الطيار الآلي</span>
-                      </Link>
-                    ) : null}
+                  <div className="chat-work-links" aria-label="أدوات التشغيل الأساسية">
+                    {WORK_TOOLS.filter((tool) => !tool.sonnyOnly || id === "sonny").map((tool) => {
+                      const Icon = tool.icon;
+                      return (
+                        <article key={tool.id} className="chat-work-card">
+                          <span className="chat-work-card-icon">
+                            <Icon className="size-4" />
+                          </span>
+                          <div>
+                            <strong>{tool.title}</strong>
+                            <small>{tool.description}</small>
+                          </div>
+                          <div className="chat-work-card-actions">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEmbeddedTool(tool);
+                                setBarPanel(null);
+                              }}
+                            >
+                              فتح هنا
+                            </button>
+                            <Link
+                              to={tool.to}
+                              aria-label={`فتح صفحة ${tool.title}`}
+                              title="فتح الصفحة الكاملة"
+                            >
+                              <ExternalLink className="size-3.5" />
+                            </Link>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                  <div className="chat-work-actions">
+                    <p>إجراءات {member.name} المباشرة</p>
+                    <ActionPanel
+                      employeeId={id}
+                      workspaceId={workspace?.id}
+                      connected={(integrations ?? [])
+                        .filter((integration) => integration.status === "connected")
+                        .map((integration) => integration.provider)}
+                    />
                   </div>
                 </div>
               )}
