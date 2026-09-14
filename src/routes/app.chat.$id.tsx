@@ -488,7 +488,13 @@ function ChatPage() {
   return <ChatView key={id} id={id} member={member} />;
 }
 
-function ChatView({ id, member }: { id: string; member: NonNullable<ReturnType<typeof getMember>> }) {
+function ChatView({
+  id,
+  member,
+}: {
+  id: string;
+  member: NonNullable<ReturnType<typeof getMember>>;
+}) {
   const qc = useQueryClient();
   const { data: workspace } = useWorkspace();
   const { data: profile } = useProfile();
