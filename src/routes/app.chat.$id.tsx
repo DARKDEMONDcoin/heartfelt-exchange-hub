@@ -1041,9 +1041,11 @@ function ChatView({
                   rotatingPlaceholder ? `${rotatingPlaceholder}▌` : `اكتب طلبك لـ${member.name}…`
                 }
                 dir="auto"
+                rows={1}
+                style={{ height: draft ? undefined : "3rem" }}
                 className={cn(
-                  "max-h-40 min-h-12 bg-transparent px-3 py-2.5 placeholder:text-muted-foreground/80",
-                  draft ? "field-sizing-content" : "field-sizing-fixed h-12",
+                  "field-sizing-fixed max-h-40 min-h-12 resize-none bg-transparent px-3 py-2.5 placeholder:text-muted-foreground/80",
+                  draft ? "overflow-y-auto" : "overflow-hidden",
                 )}
               />
               {toolsOpen ? (
