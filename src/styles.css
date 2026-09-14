@@ -12282,6 +12282,7 @@ section:has(> .integration-grid-wave) {
 
 /* مربع الإدخال: شفاف من كل الاتجاهات، والكلام حوله يبقى مقروءاً. */
 .chat-composer-dock {
+  z-index: 40;
   background: transparent;
 }
 .chat-composer {
