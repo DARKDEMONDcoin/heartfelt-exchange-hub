@@ -13101,3 +13101,52 @@ section:has(> .integration-grid-wave) {
     transform: none;
   }
 }
+
+/* رسائل المستخدم: خط فاتح واضح فوق الفقاعة الداكنة. */
+.chat-stage .bubble-user,
+.chat-stage .bubble-user *,
+.bubble-user,
+.bubble-user * {
+  color: var(--cream);
+}
+.chat-stage .bubble-user a,
+.bubble-user a {
+  color: color-mix(in oklab, var(--gold) 70%, var(--cream));
+}
+
+/* الغلاف الذهبي: حركة تلقائية أسرع تروح وتيجي وتُخلّف أثر مرور. */
+.chat-stage::before {
+  animation:
+    sahl-chat-aura 6.5s ease-in-out infinite alternate,
+    sahl-gold-breathe 3.2s ease-in-out infinite;
+}
+.chat-stage::after {
+  animation:
+    sahl-chat-aura 8s ease-in-out infinite alternate-reverse,
+    sahl-gold-breathe 4.1s ease-in-out infinite;
+}
+.sahl-smoke-app i:nth-child(1) {
+  animation-duration: 7s;
+}
+.sahl-smoke-app i:nth-child(2) {
+  animation-duration: 9s;
+}
+.sahl-smoke-app i:nth-child(3) {
+  animation-duration: 11s;
+}
+@keyframes sahl-gold-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-stage::before,
+  .chat-stage::after,
+  .sahl-smoke-app i {
+    animation: none;
+  }
+}

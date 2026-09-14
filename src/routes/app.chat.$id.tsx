@@ -723,7 +723,6 @@ function ChatPage() {
       setPendingText(message);
       setError(e instanceof Error ? e.message : "تعذّر إرسال الطلب");
     },
-
   });
 
   const skillRun = useMutation({
@@ -788,7 +787,6 @@ function ChatPage() {
     skillRun.reset();
     inputRef.current?.focus();
   };
-
 
   return (
     <AppShell
@@ -1159,7 +1157,6 @@ function ChatPage() {
                   "max-h-40 min-h-12 bg-transparent px-3 py-2.5 placeholder:text-muted-foreground/80",
                   draft ? "field-sizing-content" : "field-sizing-fixed h-12",
                 )}
-
               />
               {toolsOpen ? (
                 <div className="chat-tool-launcher" aria-label="أدوات الطلب">
@@ -1263,7 +1260,6 @@ function ChatPage() {
                   title={busy ? "إيقاف الطلب" : "إرسال"}
                   className="size-9 rounded-lg"
                 />
-
               </PromptInputFooter>
             </PromptInput>
           </div>
@@ -1535,7 +1531,6 @@ function ChatPage() {
           ) : null}
           <div className="chat-side-links">
             <button
-
               type="button"
               onClick={() => {
                 setShowSettings(false);
