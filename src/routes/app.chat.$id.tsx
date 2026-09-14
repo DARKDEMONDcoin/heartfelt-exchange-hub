@@ -563,9 +563,6 @@ function ChatView({
 
   useEffect(() => {
     if (!conversationId && conversations?.[0]) setConversationId(conversations[0].id);
-    if (conversationId && conversations && !conversations.some((c) => c.id === conversationId)) {
-      setConversationId(conversations[0]?.id);
-    }
   }, [conversationId, conversations]);
 
   /** لوحات الشريط العلوي — تُفتح كلها داخل نفس الصفحة. */
