@@ -12,9 +12,7 @@ const VISION_GEMINI = "gemini-3.5-flash-lite";
 
 type Attachment = { url: string; type: "image" | "video"; alt?: string | undefined };
 
-type Part =
-  | { type: "text"; text: string }
-  | { type: "image_url"; image_url: { url: string } };
+type Part = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
 
 async function callVision(
   endpoint: string,
@@ -46,6 +44,30 @@ async function callVision(
   return content.trim();
 }
 
+const MAX_INLINE_BYTES = 6 * 1024 * 1024;
+
+/**
+ * النماذج البصرية لا تستطيع جلب الروابط الموقّعة أو المحمية بـ robots،
+ * فنجلب البايتات بأنفسنا ونمرّرها كـ data URL.
+ */
+async function inlineImage(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; SahlMediaReader/1.0)" },
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!res.ok) return null;
+    const type = res.headers.get("content-type") ?? "image/jpeg";
+    if (!type.startsWith("image/")) return null;
+    const buf = await res.arrayBuffer();
+    if (buf.byteLength > MAX_INLINE_BYTES) return null;
+    const base64 = Buffer.from(buf).toString("base64");
+    return `data:${type};base64,${base64}`;
+  } catch {
+    return null;
+  }
+}
+
 /** وصف نصي لوسائط المستخدم (حتى ١٠ عناصر) — سلسلة فارغة عند تعذّر التحليل. */
 export async function describeUserMedia(attachments: Attachment[]): Promise<string> {
   const images = attachments.filter((a) => a.type === "image").slice(0, 10);
@@ -56,12 +78,17 @@ export async function describeUserMedia(attachments: Attachment[]): Promise<stri
 
   if (!images.length) return videoNote;
 
+  const inlined = (await Promise.all(images.map((a) => inlineImage(a.url)))).filter(
+    (u): u is string => Boolean(u),
+  );
+  if (!inlined.length) return videoNote;
+
   const parts: Part[] = [
     {
       type: "text",
-      text: `صِف هذه ${images.length} صورة/صور المرفقة من المستخدم، سطر لكل صورة.`,
+      text: `صِف هذه ${inlined.length} صورة/صور المرفقة من المستخدم، سطر لكل صورة.`,
     },
-    ...images.map((a) => ({ type: "image_url" as const, image_url: { url: a.url } })),
+    ...inlined.map((url) => ({ type: "image_url" as const, image_url: { url } })),
   ];
 
   try {

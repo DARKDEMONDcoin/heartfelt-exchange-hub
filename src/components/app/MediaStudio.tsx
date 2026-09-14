@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ImagePlus, Loader2, Link2, X, Wand2, Check, Globe, RefreshCw } from "lucide-react";
+import { ImagePlus, Loader2, Link2, X, Wand2, Check, Globe, RefreshCw, Upload } from "lucide-react";
 
+import { supabase } from "@/integrations/supabase/client";
 import { generateMedia } from "@/lib/media.functions";
 import { listSiteAssets, syncSiteAssets, type StoredAsset } from "@/lib/brand-assets.functions";
 import { ReelStudio } from "@/components/app/ReelStudio";
 import { cn } from "@/lib/utils";
 
 export type Attachment = { url: string; type: "image" | "video"; alt?: string };
+
+/** حتى ١٠ صور/فيديوهات مع بعض في نفس الرسالة، وكل ملف حتى ٥٠ ميجابايت. */
+const MAX_ATTACHMENTS = 10;
+const MAX_BYTES = 50 * 1024 * 1024;
 export type ImageMode = "auto" | "off" | "manual";
 export type Aspect = "square" | "portrait" | "landscape" | "story";
 
@@ -63,6 +68,8 @@ export function MediaStudio({
   const [results, setResults] = useState<string[]>([]);
   const [linkValue, setLinkValue] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(0);
+  const fileInput = useRef<HTMLInputElement>(null);
   const generate = useServerFn(generateMedia);
 
   const run = useMutation({
@@ -104,8 +111,57 @@ export function MediaStudio({
   });
 
   const attach = (url: string, type: "image" | "video") => {
-    if (attachments.some((a) => a.url === url) || attachments.length >= 8) return;
+    if (attachments.some((a) => a.url === url) || attachments.length >= MAX_ATTACHMENTS) return;
     onAttachmentsChange([...attachments, { url, type }]);
+  };
+
+  /** رفع صور وفيديوهات من جهاز المستخدم (المعرض) إلى مخزن مساحة العمل، حتى ١٠ عناصر. */
+  const uploadFiles = async (files: File[]) => {
+    if (!workspaceId) return setError("اختر مساحة العمل أولاً.");
+    const room = MAX_ATTACHMENTS - attachments.length;
+    if (room <= 0) return setError(`الحد الأقصى ${MAX_ATTACHMENTS} ملفات مع بعض.`);
+    const picked = files.slice(0, room);
+    if (files.length > room) setError(`أرفقنا ${room} ملفات فقط — الحد الأقصى ${MAX_ATTACHMENTS}.`);
+    else setError(null);
+
+    setUploading(picked.length);
+    const added: Attachment[] = [];
+    for (const file of picked) {
+      const isVideo = file.type.startsWith("video/");
+      const isImage = file.type.startsWith("image/");
+      if (!isVideo && !isImage) {
+        setError("اختر صوراً أو فيديوهات فقط.");
+        continue;
+      }
+      if (file.size > MAX_BYTES) {
+        setError(`«${file.name}» أكبر من ٥٠ ميجابايت.`);
+        continue;
+      }
+      try {
+        const ext = file.name.split(".").pop()?.toLowerCase() || (isVideo ? "mp4" : "jpg");
+        const key = `${workspaceId}/uploads/${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("nour-media")
+          .upload(key, file, { contentType: file.type, upsert: false });
+        if (upErr) throw upErr;
+        const { data } = await supabase.storage
+          .from("nour-media")
+          .createSignedUrl(key, 60 * 60 * 24 * 365 * 5);
+        if (!data?.signedUrl) throw new Error("no-url");
+        added.push({ url: data.signedUrl, type: isVideo ? "video" : "image", alt: file.name });
+      } catch {
+        setError(`تعذّر رفع «${file.name}». أعد المحاولة.`);
+      } finally {
+        setUploading((n) => Math.max(0, n - 1));
+      }
+    }
+    setUploading(0);
+    if (added.length) {
+      const existing = new Set(attachments.map((a) => a.url));
+      onAttachmentsChange(
+        [...attachments, ...added.filter((a) => !existing.has(a.url))].slice(0, MAX_ATTACHMENTS),
+      );
+    }
   };
 
   const addLink = () => {
@@ -205,6 +261,47 @@ export function MediaStudio({
 
       {open ? (
         <div className="mt-3 space-y-3 rounded-2xl border border-border bg-secondary/40 p-3">
+          <div className="rounded-xl border border-border bg-background/60 p-2.5">
+            <div className="flex flex-wrap items-center gap-2">
+              <Upload className="size-4 text-muted-foreground" />
+              <span className="text-[0.7rem] font-bold">من جهازك أو المعرض</span>
+              <span className="text-[0.65rem] text-muted-foreground">
+                {attachments.length}/{MAX_ATTACHMENTS}
+              </span>
+              <button
+                type="button"
+                disabled={
+                  disabled || !workspaceId || uploading > 0 || attachments.length >= MAX_ATTACHMENTS
+                }
+                onClick={() => fileInput.current?.click()}
+                className="ms-auto inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-[0.68rem] font-bold text-background disabled:opacity-40"
+              >
+                {uploading > 0 ? (
+                  <Loader2 className="size-3 animate-spin" />
+                ) : (
+                  <ImagePlus className="size-3" />
+                )}
+                {uploading > 0 ? `جاري الرفع… ${uploading}` : "اختر صوراً وفيديوهات"}
+              </button>
+            </div>
+            <p className="mt-1.5 text-[0.68rem] text-muted-foreground">
+              حتى ١٠ ملفات مع بعض (صور وفيديوهات)، كل ملف حتى ٥٠ ميجابايت — والموظف يقرأ محتواها
+              ويحلّلها إذا سألته عنها.
+            </p>
+            <input
+              ref={fileInput}
+              type="file"
+              accept="image/*,video/*"
+              multiple
+              className="hidden"
+              onChange={(event) => {
+                const files = Array.from(event.target.files ?? []);
+                event.target.value = "";
+                if (files.length) void uploadFiles(files);
+              }}
+            />
+          </div>
+
           {imageMode === "manual" ? (
             <label className="block">
               <span className="text-[0.7rem] font-bold text-muted-foreground">
