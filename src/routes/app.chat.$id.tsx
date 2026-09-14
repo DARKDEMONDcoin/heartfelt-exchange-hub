@@ -531,7 +531,8 @@ function ChatPage() {
   const runSkillFn = useServerFn(runSkill);
   const employeeSkills = skillsFor(id);
   const quickSkills = featuredSkillsFor(id).slice(0, 6);
-  const employeeCopy = EMPLOYEE_COPY[id] ?? EMPLOYEE_COPY.sonny;
+  const employeeCopy: { prompts: string[]; greetings: string[] } =
+    EMPLOYEE_COPY[id] ?? EMPLOYEE_COPY["sonny"]!;
   const rotatingPlaceholder = useTypewriter(employeeCopy.prompts);
   const rotatingGreeting = useTypewriter(employeeCopy.greetings, 2400);
   const userName = profile?.full_name?.trim().split(/\s+/)[0] || "صديقي";
