@@ -11580,11 +11580,6 @@ section:has(> .integration-grid-wave) {
   font-size: clamp(0.94rem, 2vw, 1.08rem);
   line-height: 1.9;
 }
-.chat-welcome-tagline {
-  margin-top: 0.55rem;
-  color: var(--muted-foreground);
-  font-size: 0.75rem;
-}
 .typewriter-caret {
   display: inline-block;
   width: 1px;
