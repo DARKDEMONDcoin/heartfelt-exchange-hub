@@ -44,6 +44,27 @@ async function callVision(
   return content.trim();
 }
 
+const MAX_INLINE_BYTES = 6 * 1024 * 1024;
+
+/**
+ * النماذج البصرية لا تستطيع جلب الروابط الموقّعة أو المحمية بـ robots،
+ * فنجلب البايتات بأنفسنا ونمرّرها كـ data URL.
+ */
+async function inlineImage(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+    if (!res.ok) return null;
+    const type = res.headers.get("content-type") ?? "image/jpeg";
+    if (!type.startsWith("image/")) return null;
+    const buf = await res.arrayBuffer();
+    if (buf.byteLength > MAX_INLINE_BYTES) return null;
+    const base64 = Buffer.from(buf).toString("base64");
+    return `data:${type};base64,${base64}`;
+  } catch {
+    return null;
+  }
+}
+
 /** وصف نصي لوسائط المستخدم (حتى ١٠ عناصر) — سلسلة فارغة عند تعذّر التحليل. */
 export async function describeUserMedia(attachments: Attachment[]): Promise<string> {
   const images = attachments.filter((a) => a.type === "image").slice(0, 10);
