@@ -259,7 +259,7 @@ export function AppShell({
             >
               {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
-            <div className="min-w-0 flex-1 max-sm:hidden">
+            <div className="min-w-0 flex-1">
               <h1 className="truncate font-display text-base font-black sm:text-lg">{title}</h1>
               {lead ? (
                 <p className="truncate text-xs text-muted-foreground sm:text-sm">{lead}</p>
