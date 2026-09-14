@@ -1259,7 +1259,7 @@ function ChatView({
                 <span>الصفحة الكاملة</span>
               </Link>
             </header>
-            <iframe src={embeddedTool.to} title={embeddedTool.title} />
+            <iframe src={`${embeddedTool.to}?embedded=1`} title={embeddedTool.title} />
           </section>
         ) : null}
 
