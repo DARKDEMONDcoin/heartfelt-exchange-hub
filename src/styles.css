@@ -13311,7 +13311,6 @@ section:has(> .integration-grid-wave) {
     display: none;
   }
 }
-}
 
 /* الدخان الذهبي يملأ الغلاف ويتحرك سريعاً في مسارات متعددة قبل بدء المحادثة. */
 .chat-smoke i:nth-child(1) {

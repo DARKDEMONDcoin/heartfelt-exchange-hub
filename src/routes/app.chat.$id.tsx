@@ -1409,17 +1409,15 @@ function ChatView({
                   </label>
                   <button
                     type="button"
-                    disabled={!workspace || createConversation.isPending}
-                    onClick={() =>
-                      (() => {
-                        setConversationId(undefined);
-                        setBarPanel(null);
-                        setDraft("");
-                        setPending(null);
-                        setError(null);
-                        inputRef.current?.focus();
-                      })()
-                    }
+                    disabled={!workspace}
+                    onClick={() => {
+                      setConversationId(undefined);
+                      setBarPanel(null);
+                      setDraft("");
+                      setPending(null);
+                      setError(null);
+                      inputRef.current?.focus();
+                    }}
                     className="chat-history-new"
                   >
                     <Plus className="size-4" />
