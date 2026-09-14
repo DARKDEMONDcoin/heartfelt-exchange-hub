@@ -52,7 +52,10 @@ const MAX_INLINE_BYTES = 6 * 1024 * 1024;
  */
 async function inlineImage(url: string): Promise<string | null> {
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; SahlMediaReader/1.0)" },
+      signal: AbortSignal.timeout(15_000),
+    });
     if (!res.ok) return null;
     const type = res.headers.get("content-type") ?? "image/jpeg";
     if (!type.startsWith("image/")) return null;
