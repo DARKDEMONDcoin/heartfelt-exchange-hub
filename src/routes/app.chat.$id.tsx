@@ -647,6 +647,11 @@ function ChatPage() {
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
+    // مربع فارغ = ارتفاع ثابت، حتى لا يتحرك مع تقليب الجُمل.
+    if (!draft) {
+      el.style.height = "";
+      return;
+    }
     el.style.height = "auto";
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
   }, [draft]);
