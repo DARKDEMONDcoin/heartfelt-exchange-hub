@@ -332,7 +332,18 @@ export const team: TeamMember[] = [
       { k: "التقارير", v: "تلقائية" },
       { k: "زمن التنبيه", v: "فوري" },
     ],
-    apps: ["analytics", "sheets", "shopify", "meta-ads", "search-console"],
+    apps: [
+      "analytics",
+      "search-console",
+      "meta-ads",
+      "google-ads",
+      "shopify",
+      "stripe",
+      "hubspot",
+      "sheets",
+      "drive",
+      "slack",
+    ],
     skills: ["تحليل قنوات", "توقعات", "لوحات بيانات", "اختبارات A/B"],
     sample: [
       {
