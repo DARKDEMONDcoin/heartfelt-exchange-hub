@@ -41,6 +41,8 @@ export function MediaStudio({
   aspect,
   onAspectChange,
   disabled,
+  defaultOpen = false,
+  hideTrigger = false,
 }: {
   workspaceId: string | undefined;
   attachments: Attachment[];
@@ -52,8 +54,10 @@ export function MediaStudio({
   aspect: Aspect;
   onAspectChange: (value: Aspect) => void;
   disabled?: boolean;
+  defaultOpen?: boolean;
+  hideTrigger?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [prompt, setPrompt] = useState("");
   const [count, setCount] = useState(2);
   const [literal, setLiteral] = useState(true);
@@ -120,7 +124,7 @@ export function MediaStudio({
 
   return (
     <div className={open ? "w-full" : "min-w-0"}>
-      <div className="flex flex-wrap items-center gap-2">
+      {!hideTrigger ? <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
           disabled={disabled}
@@ -162,7 +166,7 @@ export function MediaStudio({
             </button>
           ))}
         </div>
-      </div>
+      </div> : null}
 
       {attachments.length ? (
         <div className="mt-2 flex flex-wrap gap-2">
