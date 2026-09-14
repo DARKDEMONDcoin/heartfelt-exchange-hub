@@ -262,13 +262,13 @@ export function AppShell({
             >
               {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
-            <div className="min-w-0 flex-1">
+            <div className={cn("min-w-0 flex-1", compactTitle && "hidden sm:block")}>
               <h1 className="truncate font-display text-base font-black sm:text-lg">{title}</h1>
               {lead ? (
                 <p className="truncate text-xs text-muted-foreground sm:text-sm">{lead}</p>
               ) : null}
             </div>
-            <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2">
+            <div className="flex min-w-0 shrink items-center gap-1 sm:gap-2">
               {actions}
               <Link
                 to="/app/approvals"
