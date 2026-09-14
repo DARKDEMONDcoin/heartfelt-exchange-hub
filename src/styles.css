@@ -12433,6 +12433,31 @@ section:has(> .integration-grid-wave) {
   border-radius: 0.75rem;
   background: color-mix(in oklab, var(--background) 52%, transparent);
 }
+.chat-side-tabs {
+  position: sticky;
+  z-index: 2;
+  top: 5.05rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.25rem;
+  margin: 0 -0.2rem;
+  padding: 0.6rem 0.2rem;
+  background: color-mix(in oklab, var(--background) 82%, transparent);
+  backdrop-filter: blur(22px);
+}
+.chat-side-tabs button {
+  min-height: 2.2rem;
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-size: 0.68rem;
+  font-weight: 800;
+  transition: 180ms ease;
+}
+.chat-side-tabs button:hover,
+.chat-side-tabs button.is-active {
+  background: color-mix(in oklab, var(--chat-accent) 9%, transparent);
+  color: var(--foreground);
+}
 .chat-side-label {
   color: var(--muted-foreground);
   font-size: 0.67rem;
@@ -12805,6 +12830,9 @@ section:has(> .integration-grid-wave) {
   background: color-mix(in oklab, var(--background) 34%, transparent);
   box-shadow: 0 18px 48px -38px var(--foreground);
   backdrop-filter: blur(14px) saturate(1.08);
+}
+.chat-composer > [data-slot="input-group"] {
+  overflow: visible;
 }
 .chat-composer::before {
   display: none;

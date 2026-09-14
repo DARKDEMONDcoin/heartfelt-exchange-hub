@@ -638,6 +638,7 @@ function ChatPage() {
   }, [workspace, conversations, createConversation]);
 
   const [showSettings, setShowSettings] = useState(false);
+  const [sidePanelTab, setSidePanelTab] = useState<"chats" | "actions" | "accounts">("chats");
   const [toolsOpen, setToolsOpen] = useState(false);
   const [activeTool, setActiveTool] = useState<"media" | "length" | null>(null);
   /** تلميح صوت العلامة اختياري تماماً — يُخفى نهائياً بضغطة واحدة. */
@@ -1268,7 +1269,25 @@ function ChatPage() {
               <X className="size-4" />
             </button>
           </div>
-          {owned.length ? (
+          <nav className="chat-side-tabs" aria-label="أقسام لوحة الموظف">
+            {(
+              [
+                ["chats", "المحادثات"],
+                ["actions", "التنفيذ"],
+                ["accounts", "الحسابات"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setSidePanelTab(value)}
+                className={cn(sidePanelTab === value && "is-active")}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
+          {sidePanelTab === "accounts" && owned.length ? (
             <section className="chat-side-section">
               <p className="chat-side-label">حسابات {member.name}</p>
               <div className="chat-side-accounts">
@@ -1292,7 +1311,7 @@ function ChatPage() {
               </div>
             </section>
           ) : null}
-          <div className="chat-side-section">
+          {sidePanelTab === "chats" ? <div className="chat-side-section">
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-display font-black">محادثات {member.name}</h2>
               <button
@@ -1352,8 +1371,8 @@ function ChatPage() {
                 </div>
               ))}
             </div>
-          </div>
-          <section className="chat-side-section">
+          </div> : null}
+          {sidePanelTab === "actions" ? <section className="chat-side-section">
             <p className="chat-side-label mb-3">التنفيذ والمتابعة</p>
             <ActionPanel
               employeeId={id}
@@ -1362,7 +1381,7 @@ function ChatPage() {
                 .filter((i) => i.status === "connected")
                 .map((i) => i.provider)}
             />
-          </section>
+          </section> : null}
           <div className="chat-side-links">
             <Link to="/app/brain">
               <BookOpenText className="size-4" />
