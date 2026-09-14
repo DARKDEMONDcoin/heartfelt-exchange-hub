@@ -483,7 +483,12 @@ function useTypewriter(lines: string[], pause = 1700) {
 
 function ChatPage() {
   const { id } = Route.useParams();
-  const member = getMember(id)!;
+  const member = getMember(id);
+  if (!member) return <ChatMissing />;
+  return <ChatView key={id} id={id} member={member} />;
+}
+
+function ChatView({ id, member }: { id: string; member: NonNullable<ReturnType<typeof getMember>> }) {
   const qc = useQueryClient();
   const { data: workspace } = useWorkspace();
   const { data: profile } = useProfile();
