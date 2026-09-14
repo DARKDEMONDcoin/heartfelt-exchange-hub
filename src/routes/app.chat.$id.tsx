@@ -1115,7 +1115,9 @@ function ChatPage() {
                 ref={inputRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                placeholder={rotatingPlaceholder || `اكتب طلبك لـ${member.name}…`}
+                placeholder={
+                  rotatingPlaceholder ? `${rotatingPlaceholder}▌` : `اكتب طلبك لـ${member.name}…`
+                }
                 dir="auto"
                 className="max-h-40 min-h-12 bg-transparent px-3 py-2.5 placeholder:text-muted-foreground/80"
               />
