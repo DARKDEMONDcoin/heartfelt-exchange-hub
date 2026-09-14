@@ -659,6 +659,9 @@ function ChatPage() {
 
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  /** يصير true عند إيقاف الطلب بعد الإرسال — فنتجاهل نتيجته. */
+  const cancelledRef = useRef(false);
+
   const ask = useServerFn(askEmployee);
   const runSkillFn = useServerFn(runSkill);
   const employeeSkills = skillsFor(id);
@@ -694,8 +697,13 @@ function ChatPage() {
 
     onSuccess: async (res) => {
       await qc.invalidateQueries({ queryKey: ["messages", workspace?.id, id, conversationId] });
+      if (cancelledRef.current) {
+        cancelledRef.current = false;
+        return;
+      }
       setPending(null);
       setPendingText(null);
+
       // المرفقات ووصف الصورة يخصّان الرسالة المُرسلة فقط.
       setAttachments([]);
       setImagePrompt("");
@@ -708,9 +716,14 @@ function ChatPage() {
     },
     onError: (e: unknown, message) => {
       setPending(null);
+      if (cancelledRef.current) {
+        cancelledRef.current = false;
+        return;
+      }
       setPendingText(message);
       setError(e instanceof Error ? e.message : "تعذّر إرسال الطلب");
     },
+
   });
 
   const skillRun = useMutation({
@@ -757,10 +770,25 @@ function ChatPage() {
     setError(null);
     setSavedTask(false);
 
+    cancelledRef.current = false;
     setDraft("");
     setPending(body);
     send.mutate(body);
   };
+
+  /** إيقاف الطلب بعد الإرسال: نُعيد النص إلى مربع الإدخال ونُهمل النتيجة. */
+  const stopSending = () => {
+    if (!busy) return;
+    cancelledRef.current = true;
+    if (pending) setDraft(pending);
+    setPending(null);
+    setPendingText(null);
+    setError(null);
+    send.reset();
+    skillRun.reset();
+    inputRef.current?.focus();
+  };
+
 
   return (
     <AppShell
@@ -1127,7 +1155,11 @@ function ChatPage() {
                   rotatingPlaceholder ? `${rotatingPlaceholder}▌` : `اكتب طلبك لـ${member.name}…`
                 }
                 dir="auto"
-                className="max-h-40 min-h-12 bg-transparent px-3 py-2.5 placeholder:text-muted-foreground/80"
+                className={cn(
+                  "max-h-40 min-h-12 bg-transparent px-3 py-2.5 placeholder:text-muted-foreground/80",
+                  draft ? "field-sizing-content" : "field-sizing-fixed h-12",
+                )}
+
               />
               {toolsOpen ? (
                 <div className="chat-tool-launcher" aria-label="أدوات الطلب">
@@ -1225,11 +1257,13 @@ function ChatPage() {
                   </PromptInputButton>
                 </PromptInputTools>
                 <PromptInputSubmit
-                  {...(busy ? { status: "submitted" as const } : {})}
-                  disabled={busy || !workspace || !draft.trim()}
-                  aria-label="إرسال"
+                  {...(busy ? { status: "streaming" as const, onStop: stopSending } : {})}
+                  disabled={!busy && (!workspace || !draft.trim())}
+                  aria-label={busy ? "إيقاف" : "إرسال"}
+                  title={busy ? "إيقاف الطلب" : "إرسال"}
                   className="size-9 rounded-lg"
                 />
+
               </PromptInputFooter>
             </PromptInput>
           </div>
@@ -1501,32 +1535,7 @@ function ChatPage() {
           ) : null}
           <div className="chat-side-links">
             <button
-              type="button"
-              onClick={() => {
-                setShowSettings(false);
-                setBarPanel("brand");
-              }}
-            >
-              <BookOpenText className="size-4" />
-              <span>
-                اقرأ عقل العلامة<small>{brainItems?.length ?? 0} مصادر معرفة</small>
-              </span>
-              <ArrowUpLeft className="size-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowSettings(false);
-                setBarPanel("brand");
-              }}
-            >
-              <AudioLines className="size-4" />
-              <span>
-                صوت العلامة<small>{hasVoiceGuide ? "جاهز للاستخدام" : "أضف نبرة علامتك"}</small>
-              </span>
-              <ArrowUpLeft className="size-3.5" />
-            </button>
-            <button
+
               type="button"
               onClick={() => {
                 setShowSettings(false);
