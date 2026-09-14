@@ -250,8 +250,8 @@ export function AppShell({
       ) : null}
 
       <div className="relative z-10 flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-border bg-background/92 backdrop-blur-xl">
-          <div className="flex h-16 items-center gap-2.5 px-3.5 sm:gap-3 sm:px-5">
+        <header className="app-topbar sticky top-0 z-30 px-2 pt-2 sm:px-4 sm:pt-3">
+          <div className="app-topbar-inner flex min-h-14 items-center gap-2 px-2 py-1.5 sm:gap-2.5 sm:px-3">
             <button
               className="grid size-10 shrink-0 place-items-center rounded-xl border border-border lg:hidden"
               onClick={() => setMobileOpen(true)}
@@ -265,7 +265,7 @@ export function AppShell({
                 <p className="truncate text-xs text-muted-foreground sm:text-sm">{lead}</p>
               ) : null}
             </div>
-            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+            <div className="flex min-w-0 shrink items-center gap-1.5 sm:gap-2">
               {actions}
               <Link
                 to="/app/approvals"

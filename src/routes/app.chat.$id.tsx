@@ -30,6 +30,7 @@ import { AppIcon, appLabel } from "@/components/site/AppIcon";
 import { ConnectNow } from "@/components/app/ConnectNow";
 import { getMember } from "@/data/team";
 import {
+  useAddBrainItem,
   useBrainItems,
   useConversations,
   useCreateConversation,
@@ -53,6 +54,7 @@ import { HandoffCard } from "@/components/app/HandoffCard";
 import { PublishToWordPress } from "@/components/app/PublishToWordPress";
 import { ActionPanel } from "@/components/app/ActionPanel";
 import { UserAvatar } from "@/components/app/UserAvatar";
+import { BrandVoiceExtractor } from "@/components/app/BrandVoiceExtractor";
 import { Portrait } from "@/components/site/Portrait";
 import {
   MediaStudio,
@@ -595,6 +597,7 @@ function ChatPage() {
   const { data: messages } = useMessages(workspace?.id, id, conversationId);
   const { data: integrations } = useIntegrations(workspace?.id);
   const { data: brainItems } = useBrainItems(workspace?.id);
+  const addBrainItem = useAddBrainItem(workspace?.id);
   const hasVoiceGuide = (brainItems ?? []).some((b) => b.title === "دليل صوت العلامة");
   const { prompt: prefill } = Route.useSearch();
   const [draft, setDraft] = useState(prefill ?? "");
@@ -638,6 +641,9 @@ function ChatPage() {
   }, [workspace, conversations, createConversation]);
 
   const [showSettings, setShowSettings] = useState(false);
+  /** لوحات الشريط العلوي — تُفتح كلها داخل نفس الصفحة. */
+  const [barPanel, setBarPanel] = useState<"apps" | "brand" | null>(null);
+  const [brandSource, setBrandSource] = useState("");
   const [sidePanelTab, setSidePanelTab] = useState<"chats" | "actions" | "accounts">("chats");
   const [toolsOpen, setToolsOpen] = useState(false);
   const [activeTool, setActiveTool] = useState<"media" | "length" | null>(null);
@@ -762,7 +768,54 @@ function ChatPage() {
       lead={member.role}
       padded={false}
       actions={
-        <>
+        <div className="no-scrollbar flex min-w-0 max-w-[64vw] items-center gap-1.5 overflow-x-auto sm:max-w-none">
+          <SkillPalette
+            skills={employeeSkills}
+            quick={quickSkills}
+            hideQuick
+            disabled={!workspace}
+            pending={busy}
+            onRun={(skill, values) => {
+              setError(null);
+              skillRun.mutate({ skill, values });
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setBarPanel((v) => (v === "apps" ? null : "apps"))}
+            aria-expanded={barPanel === "apps"}
+            title={`تكاملات ${member.name}`}
+            className={cn("topbar-pill", barPanel === "apps" && "is-active")}
+          >
+            <PlugZap className="size-4 shrink-0" />
+            <span>التكاملات</span>
+            <small>
+              {owned.filter((i) => i.status === "connected").length}/{member.apps.length}
+            </small>
+          </button>
+          <button
+            type="button"
+            onClick={() => setBarPanel((v) => (v === "brand" ? null : "brand"))}
+            aria-expanded={barPanel === "brand"}
+            title="عقل وصوت العلامة"
+            className={cn("topbar-pill", barPanel === "brand" && "is-active")}
+          >
+            <Fingerprint className="size-4 shrink-0" />
+            <span>العلامة</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setBarPanel(null);
+              setShowSettings((v) => !v);
+            }}
+            aria-expanded={showSettings}
+            title={`محادثات ${member.name}`}
+            className={cn("topbar-pill", showSettings && "is-active")}
+          >
+            <History className="size-4 shrink-0" />
+            <span>المحادثات</span>
+          </button>
           <button
             type="button"
             onClick={() =>
@@ -771,17 +824,17 @@ function ChatPage() {
               })
             }
             disabled={!workspace || createConversation.isPending}
-            className="grid size-10 place-items-center rounded-xl border border-border transition-colors hover:bg-secondary disabled:opacity-50"
+            className="grid size-9 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-secondary disabled:opacity-50"
             aria-label="محادثة جديدة"
             title="محادثة جديدة"
           >
             {createConversation.isPending ? (
-              <Loader2 className="size-4.5 animate-spin" />
+              <Loader2 className="size-4 animate-spin" />
             ) : (
-              <Plus className="size-4.5" />
+              <Plus className="size-4" />
             )}
           </button>
-        </>
+        </div>
       }
     >
       <div className="chat-command-layout">
@@ -806,71 +859,6 @@ function ChatPage() {
             <SiteBadgeBar
               website={(workspace as { website?: string | null } | undefined)?.website ?? null}
             />
-            <section className="employee-command-bar" aria-label={`مساحة عمل ${member.name}`}>
-              <div className="employee-command-identity">
-                <span className="relative block size-9 shrink-0 overflow-hidden rounded-lg">
-                  <Portrait memberId={member.id} name={member.name} className="size-full" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block truncate text-xs font-black">{member.name}</span>
-                  <span className="inline-flex items-center gap-1 text-[0.62rem] font-bold text-primary">
-                    <span className="chat-live-dot size-1.5 rounded-full bg-primary" /> متصل
-                  </span>
-                </span>
-              </div>
-              <div className="employee-command-skills">
-                <SkillPalette
-                  skills={employeeSkills}
-                  quick={quickSkills}
-                  disabled={!workspace}
-                  pending={busy}
-                  onRun={(skill, values) => {
-                    setError(null);
-                    skillRun.mutate({ skill, values });
-                  }}
-                />
-              </div>
-              <Link
-                to="/app/brain"
-                className="employee-command-link"
-                title="المصادر التي يقرأها الموظف"
-              >
-                <BookOpenText className="size-3.5" />
-                <span>عقل العلامة</span>
-              </Link>
-              <Link to="/app/brain" className="employee-command-link" title="نبرة وأسلوب علامتك">
-                <AudioLines className="size-3.5" />
-                <span>صوت العلامة</span>
-              </Link>
-              <Link
-                to="/app/integrations"
-                className="employee-command-link"
-                title="حسابات الموظف المرتبطة"
-              >
-                <PlugZap className="size-3.5" />
-                <span>التكاملات</span>
-              </Link>
-              {owned.length ? (
-                <div className="employee-command-apps" aria-label="التطبيقات المتاحة">
-                  {owned.slice(0, 5).map((integration) => (
-                    <span key={integration.id} title={appLabel(integration.provider)}>
-                      <AppIcon name={integration.provider} className="size-5" />
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-              <button
-                type="button"
-                onClick={() => setShowSettings((value) => !value)}
-                aria-expanded={showSettings}
-                aria-label="المحادثات والتنفيذ"
-                title="المحادثات والتنفيذ"
-                className={cn("employee-command-history", showSettings && "is-active")}
-              >
-                <History className="size-4" />
-                <span>المحادثات</span>
-              </button>
-            </section>
             {brainItems &&
             !hasVoiceGuide &&
             !voiceHintHidden &&
@@ -1247,6 +1235,131 @@ function ChatPage() {
           </div>
         </div>
 
+        {barPanel ? (
+          <>
+            <button
+              type="button"
+              aria-label="إغلاق اللوحة"
+              onClick={() => setBarPanel(null)}
+              className="topbar-sheet-backdrop"
+            />
+            <section
+              className="topbar-sheet"
+              aria-label={barPanel === "apps" ? `تكاملات ${member.name}` : "عقل وصوت العلامة"}
+            >
+              <div className="topbar-sheet-head">
+                {barPanel === "apps" ? (
+                  <PlugZap className="size-4 text-primary" />
+                ) : (
+                  <Fingerprint className="size-4 text-primary" />
+                )}
+                <div>
+                  <p>{barPanel === "apps" ? `تكاملات ${member.name}` : "عقل وصوت العلامة"}</p>
+                  <span>
+                    {barPanel === "apps"
+                      ? "اربط الحسابات التي يحتاجها من هنا مباشرة"
+                      : "المصادر التي يقرأها ونبرة كتابته"}
+                  </span>
+                </div>
+                <button type="button" onClick={() => setBarPanel(null)} aria-label="إغلاق">
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              {barPanel === "apps" ? (
+                <div className="mt-1">
+                  {member.apps.map((provider) => {
+                    const row = owned.find((i) => i.provider === provider);
+                    const connected = row?.status === "connected";
+                    return (
+                      <div key={provider} className="topbar-app-row">
+                        <AppIcon name={provider} className="size-5 shrink-0" />
+                        <span className="truncate">{appLabel(provider)}</span>
+                        {connected ? (
+                          <span className="is-connected">متصل</span>
+                        ) : (
+                          <span className="ms-auto shrink-0">
+                            <ConnectNow
+                              workspaceId={workspace?.id}
+                              provider={provider}
+                              size="sm"
+                              label="اربط"
+                            />
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-3 space-y-3">
+                  <div className="rounded-2xl border border-border/70 p-3">
+                    <p className="flex items-center gap-2 text-xs font-black">
+                      <BookOpenText className="size-4 text-primary" /> عقل العلامة
+                      <span className="ms-auto text-[0.66rem] font-bold text-muted-foreground">
+                        {brainItems?.length ?? 0} مصادر
+                      </span>
+                    </p>
+                    <div className="mt-2 space-y-1">
+                      {(brainItems ?? []).slice(0, 5).map((item) => (
+                        <p key={item.id} className="truncate text-[0.72rem] text-muted-foreground">
+                          • {item.title}
+                        </p>
+                      ))}
+                      {(brainItems ?? []).length === 0 ? (
+                        <p className="text-[0.72rem] text-muted-foreground">
+                          لا مصادر بعد — الصق رابط موقعك ليقرأه {member.name}.
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <input
+                        value={brandSource}
+                        onChange={(e) => setBrandSource(e.target.value)}
+                        placeholder="رابط أو ملاحظة عن علامتك…"
+                        dir="auto"
+                        className="min-w-0 flex-1 rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none focus:border-primary"
+                      />
+                      <button
+                        type="button"
+                        disabled={!workspace || !brandSource.trim() || addBrainItem.isPending}
+                        onClick={() =>
+                          addBrainItem.mutate(
+                            {
+                              kind: brandSource.trim().startsWith("http") ? "link" : "note",
+                              title: brandSource.trim().slice(0, 120),
+                              body: brandSource.trim(),
+                            },
+                            { onSuccess: () => setBrandSource("") },
+                          )
+                        }
+                        className="shrink-0 rounded-full bg-foreground px-3 py-2 text-[0.7rem] font-bold text-background disabled:opacity-50"
+                      >
+                        {addBrainItem.isPending ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          "أضف"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-border/70 p-3">
+                    <p className="flex items-center gap-2 text-xs font-black">
+                      <AudioLines className="size-4 text-primary" /> صوت العلامة
+                      <span className="ms-auto text-[0.66rem] font-bold text-muted-foreground">
+                        {hasVoiceGuide ? "جاهز" : "غير مضبوط"}
+                      </span>
+                    </p>
+                    <div className="mt-2">
+                      <BrandVoiceExtractor workspaceId={workspace?.id} compact />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </section>
+          </>
+        ) : null}
+
         {showSettings ? (
           <button
             type="button"
@@ -1387,21 +1500,39 @@ function ChatPage() {
             </section>
           ) : null}
           <div className="chat-side-links">
-            <Link to="/app/brain">
+            <button
+              type="button"
+              onClick={() => {
+                setShowSettings(false);
+                setBarPanel("brand");
+              }}
+            >
               <BookOpenText className="size-4" />
               <span>
                 اقرأ عقل العلامة<small>{brainItems?.length ?? 0} مصادر معرفة</small>
               </span>
               <ArrowUpLeft className="size-3.5" />
-            </Link>
-            <Link to="/app/brain">
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowSettings(false);
+                setBarPanel("brand");
+              }}
+            >
               <AudioLines className="size-4" />
               <span>
                 صوت العلامة<small>{hasVoiceGuide ? "جاهز للاستخدام" : "أضف نبرة علامتك"}</small>
               </span>
               <ArrowUpLeft className="size-3.5" />
-            </Link>
-            <Link to="/app/integrations">
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowSettings(false);
+                setBarPanel("apps");
+              }}
+            >
               <PlugZap className="size-4" />
               <span>
                 كل التكاملات
@@ -1410,7 +1541,7 @@ function ChatPage() {
                 </small>
               </span>
               <ArrowUpLeft className="size-3.5" />
-            </Link>
+            </button>
           </div>
         </aside>
       </div>
