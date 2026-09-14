@@ -144,7 +144,7 @@ const input = z.object({
         alt: z.string().max(160).optional(),
       }),
     )
-    .max(8)
+    .max(10)
     .optional(),
   /** تحكّم المستخدم في الصورة التلقائية: تلقائي · إيقاف · وصف يكتبه بنفسه. */
   imageMode: z.enum(["auto", "off", "manual"]).optional(),
