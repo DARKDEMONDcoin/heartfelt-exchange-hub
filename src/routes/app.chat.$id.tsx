@@ -1315,8 +1315,12 @@ function ChatView({
         </div>
 
         {embeddedTool?.mode === "expanded" ? (
-          <section className="chat-embedded-tool" aria-label={embeddedTool.tool.title}>
-            <header>
+          <section
+            className="chat-embedded-tool"
+            aria-label={embeddedTool.tool.title}
+            style={toolStyle}
+          >
+            <header className="chat-tool-drag" {...dragHandlers}>
               <button
                 type="button"
                 onClick={() => setEmbeddedTool(null)}
