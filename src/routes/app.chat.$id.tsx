@@ -1500,21 +1500,39 @@ function ChatPage() {
             </section>
           ) : null}
           <div className="chat-side-links">
-            <Link to="/app/brain">
+            <button
+              type="button"
+              onClick={() => {
+                setShowSettings(false);
+                setBarPanel("brand");
+              }}
+            >
               <BookOpenText className="size-4" />
               <span>
                 اقرأ عقل العلامة<small>{brainItems?.length ?? 0} مصادر معرفة</small>
               </span>
               <ArrowUpLeft className="size-3.5" />
-            </Link>
-            <Link to="/app/brain">
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowSettings(false);
+                setBarPanel("brand");
+              }}
+            >
               <AudioLines className="size-4" />
               <span>
                 صوت العلامة<small>{hasVoiceGuide ? "جاهز للاستخدام" : "أضف نبرة علامتك"}</small>
               </span>
               <ArrowUpLeft className="size-3.5" />
-            </Link>
-            <Link to="/app/integrations">
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowSettings(false);
+                setBarPanel("apps");
+              }}
+            >
               <PlugZap className="size-4" />
               <span>
                 كل التكاملات
@@ -1523,7 +1541,7 @@ function ChatPage() {
                 </small>
               </span>
               <ArrowUpLeft className="size-3.5" />
-            </Link>
+            </button>
           </div>
         </aside>
       </div>
