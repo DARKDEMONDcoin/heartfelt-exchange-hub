@@ -4,7 +4,7 @@ import { acceptProposal } from "@/lib/proactive.server";
 const c = createClient<Database>(process.env["SUPABASE_URL"]!, process.env["SUPABASE_SERVICE_ROLE_KEY"]!, { auth:{persistSession:false} });
 const { data } = await c.from("proposals").select("id,workspace_id,title,skill_id").eq("status","open").not("skill_id","is",null).limit(1).single();
 console.log("accepting", data!.title, data!.skill_id);
-const r = await acceptProposal(c, data!.workspace_id, data!.id);
+const r = await acceptProposal(c, { workspaceId: data!.workspace_id, proposalId: data!.id });
 console.log("RESULT", r);
 const { data: row } = await c.from("proposals").select("status,task_id").eq("id", data!.id).single();
 console.log("ROW", row);
