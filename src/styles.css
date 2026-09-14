@@ -4544,7 +4544,7 @@
 }
 .flow-tip {
   position: absolute;
-  bottom: calc(100% + 0.8rem);
+  bottom: calc(100% + 1rem);
   left: 50%;
   translate: -50% 0;
   white-space: nowrap;
@@ -12841,7 +12841,7 @@ section:has(> .integration-grid-wave) {
   position: absolute;
   z-index: 36;
   inset-inline-end: 0.55rem;
-  bottom: calc(100% + 0.8rem);
+  bottom: calc(100% + 1rem);
   display: flex;
   gap: 0.45rem;
   padding: 0;
