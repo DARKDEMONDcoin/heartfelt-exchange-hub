@@ -116,13 +116,13 @@ export function SkillPalette({ skills, disabled, pending, onRun, quick, hideQuic
           type="button"
           onClick={() => setBrowsing(true)}
           disabled={disabled || pending}
-          className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-background px-3.5 py-2 text-xs font-bold transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card disabled:opacity-50 disabled:hover:translate-y-0"
+          className="group inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-2 text-xs font-bold transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card disabled:opacity-50 disabled:hover:translate-y-0 sm:gap-2 sm:px-3.5"
         >
           <span className="grid size-5 place-items-center rounded-full bg-primary/12 text-primary transition-transform group-hover:rotate-12">
             <Sparkles className="size-3" strokeWidth={2.6} />
           </span>
-          كل القدرات
-          <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[0.65rem] tabular-nums text-muted-foreground">
+          <span className="hidden lg:inline">كل القدرات</span>
+          <span className="hidden rounded-full bg-secondary px-1.5 py-0.5 text-[0.65rem] tabular-nums text-muted-foreground sm:inline">
             {skills.length}
           </span>
         </button>
