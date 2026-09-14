@@ -75,12 +75,17 @@ export async function describeUserMedia(attachments: Attachment[]): Promise<stri
 
   if (!images.length) return videoNote;
 
+  const inlined = (await Promise.all(images.map((a) => inlineImage(a.url)))).filter(
+    (u): u is string => Boolean(u),
+  );
+  if (!inlined.length) return videoNote;
+
   const parts: Part[] = [
     {
       type: "text",
-      text: `صِف هذه ${images.length} صورة/صور المرفقة من المستخدم، سطر لكل صورة.`,
+      text: `صِف هذه ${inlined.length} صورة/صور المرفقة من المستخدم، سطر لكل صورة.`,
     },
-    ...images.map((a) => ({ type: "image_url" as const, image_url: { url: a.url } })),
+    ...inlined.map((url) => ({ type: "image_url" as const, image_url: { url } })),
   ];
 
   try {
