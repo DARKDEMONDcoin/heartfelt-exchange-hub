@@ -12,9 +12,7 @@ const VISION_GEMINI = "gemini-3.5-flash-lite";
 
 type Attachment = { url: string; type: "image" | "video"; alt?: string | undefined };
 
-type Part =
-  | { type: "text"; text: string }
-  | { type: "image_url"; image_url: { url: string } };
+type Part = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
 
 async function callVision(
   endpoint: string,

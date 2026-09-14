@@ -1,17 +1,7 @@
 import { useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  ImagePlus,
-  Loader2,
-  Link2,
-  X,
-  Wand2,
-  Check,
-  Globe,
-  RefreshCw,
-  Upload,
-} from "lucide-react";
+import { ImagePlus, Loader2, Link2, X, Wand2, Check, Globe, RefreshCw, Upload } from "lucide-react";
 
 import { supabase } from "@/integrations/supabase/client";
 import { generateMedia } from "@/lib/media.functions";
@@ -281,10 +271,7 @@ export function MediaStudio({
               <button
                 type="button"
                 disabled={
-                  disabled ||
-                  !workspaceId ||
-                  uploading > 0 ||
-                  attachments.length >= MAX_ATTACHMENTS
+                  disabled || !workspaceId || uploading > 0 || attachments.length >= MAX_ATTACHMENTS
                 }
                 onClick={() => fileInput.current?.click()}
                 className="ms-auto inline-flex items-center gap-1 rounded-lg bg-foreground px-3 py-1.5 text-[0.68rem] font-bold text-background disabled:opacity-40"
