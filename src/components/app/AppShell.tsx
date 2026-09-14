@@ -215,12 +215,15 @@ export function AppShell({
   actions,
   children,
   padded = true,
+  compactTitle = false,
 }: {
   title: string;
   lead?: string;
   actions?: ReactNode;
   children: ReactNode;
   padded?: boolean;
+  /** يخفي العنوان على الهاتف ليتّسع الشريط للأزرار دون تداخل. */
+  compactTitle?: boolean;
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { data: profile } = useProfile();
