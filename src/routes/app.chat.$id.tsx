@@ -1311,77 +1311,81 @@ function ChatPage() {
               </div>
             </section>
           ) : null}
-          {sidePanelTab === "chats" ? <div className="chat-side-section">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="font-display font-black">محادثات {member.name}</h2>
-              <button
-                type="button"
-                aria-label="محادثة جديدة"
-                title="محادثة جديدة"
-                disabled={!workspace || createConversation.isPending}
-                onClick={() =>
-                  createConversation.mutate(undefined, {
-                    onSuccess: (row) => setConversationId(row.id),
-                  })
-                }
-                className="grid size-9 place-items-center rounded-xl border border-border transition-colors hover:bg-secondary disabled:opacity-50"
-              >
-                {createConversation.isPending ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Plus className="size-4" />
-                )}
-              </button>
-            </div>
-            <div className="mt-3 max-h-[45dvh] space-y-1 overflow-y-auto">
-              {(conversations ?? []).map((conversation) => (
-                <div
-                  key={conversation.id}
-                  className={cn(
-                    "chat-side-thread group",
-                    conversation.id === conversationId
-                      ? "border-primary/40 bg-primary/10"
-                      : "border-transparent hover:bg-secondary/70",
-                  )}
+          {sidePanelTab === "chats" ? (
+            <div className="chat-side-section">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="font-display font-black">محادثات {member.name}</h2>
+                <button
+                  type="button"
+                  aria-label="محادثة جديدة"
+                  title="محادثة جديدة"
+                  disabled={!workspace || createConversation.isPending}
+                  onClick={() =>
+                    createConversation.mutate(undefined, {
+                      onSuccess: (row) => setConversationId(row.id),
+                    })
+                  }
+                  className="grid size-9 place-items-center rounded-xl border border-border transition-colors hover:bg-secondary disabled:opacity-50"
                 >
-                  <button
-                    type="button"
-                    onClick={() => setConversationId(conversation.id)}
-                    onDoubleClick={() => {
-                      const title = window.prompt("اسم المحادثة", conversation.title)?.trim();
-                      if (title) renameConversation.mutate({ id: conversation.id, title });
-                    }}
-                    className="min-w-0 flex-1 truncate px-2 py-1 text-start text-sm font-semibold"
-                    title="انقر مرتين لإعادة التسمية"
+                  {createConversation.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Plus className="size-4" />
+                  )}
+                </button>
+              </div>
+              <div className="mt-3 max-h-[45dvh] space-y-1 overflow-y-auto">
+                {(conversations ?? []).map((conversation) => (
+                  <div
+                    key={conversation.id}
+                    className={cn(
+                      "chat-side-thread group",
+                      conversation.id === conversationId
+                        ? "border-primary/40 bg-primary/10"
+                        : "border-transparent hover:bg-secondary/70",
+                    )}
                   >
-                    {conversation.title}
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="حذف المحادثة"
-                    title="حذف المحادثة"
-                    onClick={() => {
-                      if (window.confirm("حذف هذه المحادثة ورسائلها؟"))
-                        deleteConversation.mutate(conversation.id);
-                    }}
-                    className="grid size-7 shrink-0 place-items-center rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-coral/10 hover:text-coral group-hover:opacity-100 focus:opacity-100"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
-                </div>
-              ))}
+                    <button
+                      type="button"
+                      onClick={() => setConversationId(conversation.id)}
+                      onDoubleClick={() => {
+                        const title = window.prompt("اسم المحادثة", conversation.title)?.trim();
+                        if (title) renameConversation.mutate({ id: conversation.id, title });
+                      }}
+                      className="min-w-0 flex-1 truncate px-2 py-1 text-start text-sm font-semibold"
+                      title="انقر مرتين لإعادة التسمية"
+                    >
+                      {conversation.title}
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="حذف المحادثة"
+                      title="حذف المحادثة"
+                      onClick={() => {
+                        if (window.confirm("حذف هذه المحادثة ورسائلها؟"))
+                          deleteConversation.mutate(conversation.id);
+                      }}
+                      className="grid size-7 shrink-0 place-items-center rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-coral/10 hover:text-coral group-hover:opacity-100 focus:opacity-100"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div> : null}
-          {sidePanelTab === "actions" ? <section className="chat-side-section">
-            <p className="chat-side-label mb-3">التنفيذ والمتابعة</p>
-            <ActionPanel
-              employeeId={id}
-              workspaceId={workspace?.id}
-              connected={(integrations ?? [])
-                .filter((i) => i.status === "connected")
-                .map((i) => i.provider)}
-            />
-          </section> : null}
+          ) : null}
+          {sidePanelTab === "actions" ? (
+            <section className="chat-side-section">
+              <p className="chat-side-label mb-3">التنفيذ والمتابعة</p>
+              <ActionPanel
+                employeeId={id}
+                workspaceId={workspace?.id}
+                connected={(integrations ?? [])
+                  .filter((i) => i.status === "connected")
+                  .map((i) => i.provider)}
+              />
+            </section>
+          ) : null}
           <div className="chat-side-links">
             <Link to="/app/brain">
               <BookOpenText className="size-4" />
