@@ -762,7 +762,54 @@ function ChatPage() {
       lead={member.role}
       padded={false}
       actions={
-        <>
+        <div className="no-scrollbar flex min-w-0 items-center gap-1.5 overflow-x-auto">
+          <SkillPalette
+            skills={employeeSkills}
+            quick={quickSkills}
+            hideQuick
+            disabled={!workspace}
+            pending={busy}
+            onRun={(skill, values) => {
+              setError(null);
+              skillRun.mutate({ skill, values });
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setBarPanel((v) => (v === "apps" ? null : "apps"))}
+            aria-expanded={barPanel === "apps"}
+            title={`تكاملات ${member.name}`}
+            className={cn("topbar-pill", barPanel === "apps" && "is-active")}
+          >
+            <PlugZap className="size-4 shrink-0" />
+            <span>التكاملات</span>
+            <small>
+              {owned.filter((i) => i.status === "connected").length}/{member.apps.length}
+            </small>
+          </button>
+          <button
+            type="button"
+            onClick={() => setBarPanel((v) => (v === "brand" ? null : "brand"))}
+            aria-expanded={barPanel === "brand"}
+            title="عقل وصوت العلامة"
+            className={cn("topbar-pill", barPanel === "brand" && "is-active")}
+          >
+            <Fingerprint className="size-4 shrink-0" />
+            <span>العلامة</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setBarPanel(null);
+              setShowSettings((v) => !v);
+            }}
+            aria-expanded={showSettings}
+            title={`محادثات ${member.name}`}
+            className={cn("topbar-pill", showSettings && "is-active")}
+          >
+            <History className="size-4 shrink-0" />
+            <span>المحادثات</span>
+          </button>
           <button
             type="button"
             onClick={() =>
@@ -771,17 +818,17 @@ function ChatPage() {
               })
             }
             disabled={!workspace || createConversation.isPending}
-            className="grid size-10 place-items-center rounded-xl border border-border transition-colors hover:bg-secondary disabled:opacity-50"
+            className="grid size-9 shrink-0 place-items-center rounded-full border border-border transition-colors hover:bg-secondary disabled:opacity-50"
             aria-label="محادثة جديدة"
             title="محادثة جديدة"
           >
             {createConversation.isPending ? (
-              <Loader2 className="size-4.5 animate-spin" />
+              <Loader2 className="size-4 animate-spin" />
             ) : (
-              <Plus className="size-4.5" />
+              <Plus className="size-4" />
             )}
           </button>
-        </>
+        </div>
       }
     >
       <div className="chat-command-layout">
