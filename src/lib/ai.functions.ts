@@ -475,10 +475,24 @@ export const askEmployee = createServerFn({ method: "POST" })
       .reverse()
       .map((m) => ({ role: m.role === "user" ? "user" : "assistant", content: m.body }));
 
+    // قراءة فعلية لوسائط المستخدم: نصف الصور بنموذج بصري ليعتمد الموظف على محتواها.
+    let mediaRead = "";
+    if (attachments.length) {
+      try {
+        const { describeUserMedia } = await import("./media-vision.server");
+        mediaRead = await describeUserMedia(attachments);
+      } catch {
+        mediaRead = "";
+      }
+    }
+
     // نُعلم الموظف بوسائط المستخدم وبقراره حول الصورة حتى يبني عليها بدل تجاهلها.
     const mediaNote = [
       attachments.length
         ? `(المستخدم أرفق ${attachments.filter((a) => a.type === "image").length} صورة و${attachments.filter((a) => a.type === "video").length} فيديو مع الطلب — اعتمدها كوسائط المنشور ولا تطلب غيرها.)`
+        : "",
+      mediaRead
+        ? `(محتوى وسائط المستخدم كما قرأها النظام — اعتمد عليه في ردك وحلّله إن سُئلت عنه: ${mediaRead.slice(0, 2000)})`
         : "",
       data.imageMode === "off" ? "(المستخدم أوقف توليد الصور — لا تكتب image_prompt.)" : "",
       data.imageMode === "manual" && data.imagePrompt
