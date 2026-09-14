@@ -1118,15 +1118,17 @@ function ChatView({
                   </div>
                   <button
                     type="button"
-                    onClick={() =>
-                      setEmbeddedTool({ tool: embeddedTool.tool, mode: "expanded" })
-                    }
+                    onClick={() => setEmbeddedTool({ tool: embeddedTool.tool, mode: "expanded" })}
                     title="تكبير الأداة داخل المحادثة"
                     aria-label={`تكبير ${embeddedTool.tool.title}`}
                   >
                     <ExternalLink className="size-4" />
                   </button>
-                  <button type="button" onClick={() => setEmbeddedTool(null)} aria-label="إغلاق الأداة">
+                  <button
+                    type="button"
+                    onClick={() => setEmbeddedTool(null)}
+                    aria-label="إغلاق الأداة"
+                  >
                     <X className="size-4" />
                   </button>
                 </header>
@@ -1294,10 +1296,7 @@ function ChatView({
                 <span>داخل الرسائل</span>
               </button>
             </header>
-            <iframe
-              src={`${embeddedTool.tool.to}?embedded=1`}
-              title={embeddedTool.tool.title}
-            />
+            <iframe src={`${embeddedTool.tool.to}?embedded=1`} title={embeddedTool.tool.title} />
           </section>
         ) : null}
 
