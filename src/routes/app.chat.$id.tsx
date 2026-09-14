@@ -948,7 +948,7 @@ function ChatView({
                   {rotatingGreeting}
                   <span className="typewriter-caret" aria-hidden="true" />
                 </p>
-                <p className="chat-welcome-tagline">{member.tagline}</p>
+                
               </div>
             ) : null}
 
