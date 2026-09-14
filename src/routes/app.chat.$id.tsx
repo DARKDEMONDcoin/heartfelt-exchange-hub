@@ -616,7 +616,10 @@ function ChatView({
   const [barPanel, setBarPanel] = useState<"apps" | "brand" | "chats" | "work" | null>(null);
   const [brandSource, setBrandSource] = useState("");
   const [conversationSearch, setConversationSearch] = useState("");
-  const [embeddedTool, setEmbeddedTool] = useState<WorkTool | null>(null);
+  const [embeddedTool, setEmbeddedTool] = useState<{
+    tool: WorkTool;
+    mode: "inline" | "expanded";
+  } | null>(null);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [activeTool, setActiveTool] = useState<"media" | "length" | null>(null);
   const endRef = useRef<HTMLDivElement>(null);
@@ -652,7 +655,7 @@ function ChatView({
         startingNewConversation || !conversationId
           ? (await createConversation.mutateAsync()).id
           : conversationId;
-      if (!conversationId) setConversationId(activeConversationId);
+      if (startingNewConversation || !conversationId) setConversationId(activeConversationId);
       setStartingNewConversation(false);
       const result = await ask({
         data: {
@@ -708,7 +711,7 @@ function ChatView({
         startingNewConversation || !conversationId
           ? (await createConversation.mutateAsync()).id
           : conversationId;
-      if (!conversationId) setConversationId(activeConversationId);
+      if (startingNewConversation || !conversationId) setConversationId(activeConversationId);
       setStartingNewConversation(false);
       return runSkillFn({
         data: {
@@ -1106,6 +1109,34 @@ function ChatView({
               </div>
             ) : null}
 
+            {embeddedTool?.mode === "inline" ? (
+              <section className="chat-inline-tool" aria-label={embeddedTool.tool.title}>
+                <header>
+                  <div>
+                    <strong>{embeddedTool.tool.title}</strong>
+                    <span>تعمل داخل محادثة {member.name}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEmbeddedTool({ tool: embeddedTool.tool, mode: "expanded" })
+                    }
+                    title="تكبير الأداة داخل المحادثة"
+                    aria-label={`تكبير ${embeddedTool.tool.title}`}
+                  >
+                    <ExternalLink className="size-4" />
+                  </button>
+                  <button type="button" onClick={() => setEmbeddedTool(null)} aria-label="إغلاق الأداة">
+                    <X className="size-4" />
+                  </button>
+                </header>
+                <iframe
+                  src={`${embeddedTool.tool.to}?embedded=1`}
+                  title={embeddedTool.tool.title}
+                />
+              </section>
+            ) : null}
+
             <div ref={endRef} />
           </div>
 
@@ -1240,8 +1271,8 @@ function ChatView({
           </div>
         </div>
 
-        {embeddedTool ? (
-          <section className="chat-embedded-tool" aria-label={embeddedTool.title}>
+        {embeddedTool?.mode === "expanded" ? (
+          <section className="chat-embedded-tool" aria-label={embeddedTool.tool.title}>
             <header>
               <button
                 type="button"
@@ -1251,15 +1282,22 @@ function ChatView({
                 <ArrowRight className="size-4" />
               </button>
               <div>
-                <strong>{embeddedTool.title}</strong>
-                <span>مفتوحة داخل محادثة {member.name}</span>
+                <strong>{embeddedTool.tool.title}</strong>
+                <span>مفتوحة داخل نفس محادثة {member.name}</span>
               </div>
-              <Link to={embeddedTool.to} title="فتح الصفحة الكاملة">
-                <ExternalLink className="size-4" />
-                <span>الصفحة الكاملة</span>
-              </Link>
+              <button
+                type="button"
+                onClick={() => setEmbeddedTool({ tool: embeddedTool.tool, mode: "inline" })}
+                title="تصغير داخل المحادثة"
+              >
+                <ArrowRight className="size-4" />
+                <span>داخل الرسائل</span>
+              </button>
             </header>
-            <iframe src={`${embeddedTool.to}?embedded=1`} title={embeddedTool.title} />
+            <iframe
+              src={`${embeddedTool.tool.to}?embedded=1`}
+              title={embeddedTool.tool.title}
+            />
           </section>
         ) : null}
 
@@ -1497,19 +1535,23 @@ function ChatView({
                             <button
                               type="button"
                               onClick={() => {
-                                setEmbeddedTool(tool);
+                                setEmbeddedTool({ tool, mode: "inline" });
                                 setBarPanel(null);
                               }}
                             >
-                              فتح هنا
+                              داخل المحادثة
                             </button>
-                            <Link
-                              to={tool.to}
-                              aria-label={`فتح صفحة ${tool.title}`}
-                              title="فتح الصفحة الكاملة"
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEmbeddedTool({ tool, mode: "expanded" });
+                                setBarPanel(null);
+                              }}
+                              aria-label={`فتح صفحة ${tool.title} داخل المحادثة`}
+                              title="فتح بحجم كامل داخل المحادثة"
                             >
                               <ExternalLink className="size-3.5" />
-                            </Link>
+                            </button>
                           </div>
                         </article>
                       );

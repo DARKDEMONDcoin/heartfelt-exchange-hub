@@ -13231,6 +13231,48 @@ section:has(> .integration-grid-wave) {
   font-size: 0.66rem;
   font-weight: 800;
 }
+.chat-inline-tool {
+  width: 100%;
+  min-height: min(38rem, 65dvh);
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--primary) 25%, var(--border));
+  border-radius: 0.9rem;
+  background: var(--background);
+}
+.chat-inline-tool > header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 3.25rem;
+  padding-inline: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.chat-inline-tool > header strong,
+.chat-inline-tool > header span {
+  display: block;
+}
+.chat-inline-tool > header strong {
+  font-size: 0.78rem;
+}
+.chat-inline-tool > header span {
+  color: var(--muted-foreground);
+  font-size: 0.64rem;
+}
+.chat-inline-tool > header button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 0.55rem;
+  background: var(--secondary);
+}
+.chat-inline-tool > iframe {
+  width: 100%;
+  height: min(34rem, 58dvh);
+  border: 0;
+  background: var(--background);
+}
 .chat-work-card-actions button {
   padding-inline: 0.65rem;
 }
@@ -13315,6 +13357,12 @@ section:has(> .integration-grid-wave) {
   }
   .chat-embedded-tool > header > a span {
     display: none;
+  }
+  .chat-inline-tool {
+    min-height: 54dvh;
+  }
+  .chat-inline-tool > iframe {
+    height: 48dvh;
   }
 }
 
